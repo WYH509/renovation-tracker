@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id          Int         @id @default(autoincrement())
+  name        String
+  description String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  categories  Category[]
+  items       Item[]
+  expenses    Expense[]
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  projectId Int
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name      String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  items     Item[]
+  expenses  Expense[]
+}
+
+model MaterialType {
+  id        Int      @id @default(autoincrement())
+  projectId Int
+  name      String
+  parentId  Int?
+  createdAt DateTime @default(now())
+  items     Item[]
+}
+
+model Item {
+  id                   Int          @id @default(autoincrement())
+  projectId            Int
+  project              Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  categoryId           Int
+  category             Category     @relation(fields: [categoryId], references: [id])
+  materialTypeId       Int?
+  materialType         MaterialType? @relation(fields: [materialTypeId], references: [id])
+  name                 String
+  unit                 String?
+  quantity             Decimal?     @db.Decimal(10,2)
+  unitPrice            Decimal?     @db.Decimal(10,2)
+  totalPrice           Decimal?     @db.Decimal(10,2)
+  paidAmount           Decimal?     @db.Decimal(10,2) @default(0)
+  paymentStatus        String       @default("unpaid")
+  paymentDate          DateTime?
+  expectedDeliveryDate DateTime?
+  actualCompletionDate DateTime?
+  isCompleted          Boolean      @default(false)
+  reminderDays         Int?
+  reminderDate         DateTime?
+  notes                String?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+  expenses             Expense[]
+  reminders            Reminder[]
+}
+
+model Expense {
+  id          Int       @id @default(autoincrement())
+  projectId   Int
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  itemId      Int?
+  item        Item?     @relation(fields: [itemId], references: [id], onDelete: SetNull)
+  categoryId  Int?
+  category    Category? @relation(fields: [categoryId], references: [id])
+  amount      Decimal   @db.Decimal(10,2)
+  expenseDate DateTime  @default(now())
+  description String?
+  createdAt   DateTime  @default(now())
+}
+
+model Reminder {
+  id           Int      @id @default(autoincrement())
+  itemId       Int
+  item         Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  reminderDate DateTime
+  message      String
+  isCompleted  Boolean  @default(false)
+  createdAt    DateTime @default(now())
+}

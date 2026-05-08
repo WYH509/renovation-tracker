@@ -1,0 +1,16 @@
+(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[185],{75509:function(e,t,s){Promise.resolve().then(s.t.bind(s,53054,23)),Promise.resolve().then(s.bind(s,15077))},6600:function(e,t,s){"use strict";s.d(t,{Z:function(){return n}});/**
+ * @license lucide-react v0.417.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let n=(0,s(78030).Z)("Bell",[["path",{d:"M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9",key:"1qo2s2"}],["path",{d:"M10.3 21a1.94 1.94 0 0 0 3.4 0",key:"qgo35s"}]])},21907:function(e,t,s){"use strict";s.d(t,{Z:function(){return n}});/**
+ * @license lucide-react v0.417.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let n=(0,s(78030).Z)("FolderKanban",[["path",{d:"M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z",key:"1fr9dc"}],["path",{d:"M8 10v4",key:"tgpxqk"}],["path",{d:"M12 10v2",key:"hh53o1"}],["path",{d:"M16 10v6",key:"1d6xys"}]])},16463:function(e,t,s){"use strict";var n=s(71169);s.o(n,"useParams")&&s.d(t,{useParams:function(){return n.useParams}}),s.o(n,"usePathname")&&s.d(t,{usePathname:function(){return n.usePathname}}),s.o(n,"useRouter")&&s.d(t,{useRouter:function(){return n.useRouter}})},15077:function(e,t,s){"use strict";s.d(t,{default:function(){return c}});var n=s(57437),a=s(87138),r=s(16463);/**
+ * @license lucide-react v0.417.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let l=(0,s(78030).Z)("House",[["path",{d:"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8",key:"5wwlr5"}],["path",{d:"M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",key:"1d0kgt"}]]);var i=s(21907),u=s(6600);function c(){let e=(0,r.usePathname)(),t=[{href:"/",label:"首页",icon:l},{href:"/projects",label:"项目",icon:i.Z},{href:"/reminders",label:"提醒",icon:u.Z}];return(0,n.jsx)("nav",{className:"bg-white border-b border-slate-200 sticky top-0 z-50",children:(0,n.jsx)("div",{className:"container mx-auto px-4 max-w-6xl",children:(0,n.jsxs)("div",{className:"flex items-center justify-between h-14",children:[(0,n.jsxs)("div",{className:"flex items-center gap-1",children:[(0,n.jsx)("span",{className:"text-xl font-bold text-blue-600",children:"\uD83C\uDFE0"}),(0,n.jsx)("span",{className:"font-semibold text-slate-800",children:"装修记账本"})]}),(0,n.jsx)("div",{className:"flex items-center gap-1",children:t.map(t=>{let s=t.icon,r=e===t.href||"/"!==t.href&&(null==e?void 0:e.startsWith(t.href));return(0,n.jsxs)(a.default,{href:t.href,className:"flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ".concat(r?"bg-blue-50 text-blue-600":"text-slate-600 hover:bg-slate-100"),children:[(0,n.jsx)(s,{size:16}),(0,n.jsx)("span",{className:"hidden sm:inline",children:t.label})]},t.href)})})]})})})}},53054:function(){}},function(e){e.O(0,[141,48,971,23,744],function(){return e(e.s=75509)}),_N_E=e.O()}]);
