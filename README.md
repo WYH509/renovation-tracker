@@ -1,4 +1,4 @@
-# 装修记账本 (Renovation Tracker)
+﻿# 装修记账本 (Renovation Tracker)
 
 🏠 装修花费追踪管理应用 | iPhone Safari可用 | 云端数据永久存储
 
@@ -103,3 +103,5 @@ NODE_ENV=production
 ---
 
 Made with ❤️ for 装修人
+
+<!-- force push 2026-05-11 18:37:50 -->
