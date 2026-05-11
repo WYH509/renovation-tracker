@@ -1,8 +1,8 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import ProjectCard from '@/components/ProjectCard'
+import ProjectCard from '../../components/ProjectCard'
 import { Plus } from 'lucide-react'
 
 interface Project {

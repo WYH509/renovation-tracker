@@ -1,10 +1,10 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import ItemList from '@/components/ItemList'
-import ItemForm from '@/components/ItemForm'
+import ItemList from '../../../components/ItemList'
+import ItemForm from '../../../components/ItemForm'
 import { ArrowLeft, Plus, FolderKanban, BarChart3, Bell, Edit2, Trash2 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 

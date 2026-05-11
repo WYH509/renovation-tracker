@@ -1,9 +1,9 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import ProjectCard from '@/components/ProjectCard'
-import StatsCharts from '@/components/StatsCharts'
+import ProjectCard from '../components/ProjectCard'
+import StatsCharts from '../components/StatsCharts'
 import { Plus, TrendingUp, Wallet, Clock, AlertTriangle } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 

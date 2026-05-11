@@ -1,15 +1,15 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
-  "/api/export/route": "app/api/export/route.js",
   "/api/items/[id]/route": "app/api/items/[id]/route.js",
+  "/api/export/route": "app/api/export/route.js",
   "/api/projects/[id]/route": "app/api/projects/[id]/route.js",
   "/api/projects/[id]/reminders/route": "app/api/projects/[id]/reminders/route.js",
-  "/api/projects/[id]/items/route": "app/api/projects/[id]/items/route.js",
-  "/api/projects/[id]/categories/route": "app/api/projects/[id]/categories/route.js",
-  "/api/projects/route": "app/api/projects/route.js",
   "/api/projects/[id]/stats/route": "app/api/projects/[id]/stats/route.js",
+  "/api/projects/route": "app/api/projects/route.js",
   "/api/reminders/[id]/complete/route": "app/api/reminders/[id]/complete/route.js",
-  "/page": "app/page.js",
   "/projects/[projectId]/page": "app/projects/[projectId]/page.js",
-  "/projects/page": "app/projects/page.js"
+  "/page": "app/page.js",
+  "/projects/page": "app/projects/page.js",
+  "/api/projects/[id]/categories/route": "app/api/projects/[id]/categories/route.js",
+  "/api/projects/[id]/items/route": "app/api/projects/[id]/items/route.js"
 }
