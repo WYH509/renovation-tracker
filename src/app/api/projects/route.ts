@@ -65,6 +65,7 @@ export async function POST(request: Request) {
         description: description || null,
         categories: {
           create: [
+            { name: '主料', sortOrder: 0 },
             { name: '水电工程', sortOrder: 1 },
             { name: '泥瓦工程', sortOrder: 2 },
             { name: '木工工程', sortOrder: 3 },

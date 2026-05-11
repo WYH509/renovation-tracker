@@ -9,6 +9,7 @@ import { ArrowLeft, Plus, FolderKanban, BarChart3, Bell, Edit2, Trash2 } from 'l
 import { formatCurrency } from '@/lib/utils'
 
 interface Category { id: number; name: string }
+interface MaterialType { id: number; name: string; parentId: number | null }
 interface Item {
   id: number
   name: string
@@ -31,6 +32,9 @@ export default function ProjectDetailPage() {
   const [project, setProject] = useState<any>(null)
   const [items, setItems] = useState<Item[]>([])
   const [categories, setCategories] = useState<Category[]>([])
+  const [materialTypes, setMaterialTypes] = useState<MaterialType[]>([])
+  const [newMaterialTypeName, setNewMaterialTypeName] = useState('')
+  const [showMaterialTypeInput, setShowMaterialTypeInput] = useState(false)
   const [loading, setLoading] = useState(true)
   const [showItemForm, setShowItemForm] = useState(false)
   const [editingItem, setEditingItem] = useState<Item | null>(null)
@@ -42,23 +46,45 @@ export default function ProjectDetailPage() {
 
   const fetchProjectData = async () => {
     try {
-      const [projectRes, itemsRes, categoriesRes] = await Promise.all([
+      const [projectRes, itemsRes, categoriesRes, materialTypesRes] = await Promise.all([
         fetch(`/api/projects/${projectId}`),
         fetch(`/api/projects/${projectId}/items`),
-        fetch(`/api/projects/${projectId}/categories`)
+        fetch(`/api/projects/${projectId}/categories`),
+        fetch(`/api/projects/${projectId}/material-types`)
       ])
       
       const projectData = await projectRes.json()
       const itemsData = await itemsRes.json()
       const categoriesData = await categoriesRes.json()
+      const materialTypesData = await materialTypesRes.json()
 
       setProject(projectData)
       setItems(itemsData)
       setCategories(categoriesData)
+      setMaterialTypes(materialTypesData || [])
     } catch (error) {
       console.error('Failed to fetch project data:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleCreateMaterialType = async () => {
+    if (!newMaterialTypeName.trim()) return
+    try {
+      const res = await fetch(`/api/projects/${projectId}/material-types`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newMaterialTypeName.trim() })
+      })
+      if (res.ok) {
+        const newType = await res.json()
+        setMaterialTypes(prev => [...prev, newType])
+        setNewMaterialTypeName('')
+        setShowMaterialTypeInput(false)
+      }
+    } catch (error) {
+      console.error('Failed to create material type:', error)
     }
   }
 
@@ -233,7 +259,12 @@ export default function ProjectDetailPage() {
       {showItemForm && (
         <ItemForm
           categories={categories}
-          materialTypes={[]}
+          materialTypes={materialTypes}
+          onCreateMaterialType={handleCreateMaterialType}
+          newMaterialTypeName={newMaterialTypeName}
+          setNewMaterialTypeName={setNewMaterialTypeName}
+          showMaterialTypeInput={showMaterialTypeInput}
+          setShowMaterialTypeInput={setShowMaterialTypeInput}
           initialData={editingItem ? {
             name: editingItem.name,
             categoryId: categories.find(c => c.name === editingItem.category.name)?.id || categories[0]?.id,

@@ -31,6 +31,11 @@ interface MaterialType {
 interface ItemFormProps {
   categories: Category[]
   materialTypes: MaterialType[]
+  onCreateMaterialType?: () => void
+  newMaterialTypeName?: string
+  setNewMaterialTypeName?: (v: string) => void
+  showMaterialTypeInput?: boolean
+  setShowMaterialTypeInput?: (v: boolean) => void
   initialData?: Partial<ItemFormData>
   onSubmit: (data: ItemFormData) => void
   onClose: () => void
