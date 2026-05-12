@@ -165,19 +165,19 @@ export default function ProjectDetailPage() {
         </div>
       </div>
 
-      {/* 统计卡片 */}
+      {/* 统计卡片 - 固定高度避免溢出重叠 */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
-          <p className="text-sm text-slate-500">总花费</p>
-          <p className="text-xl font-bold text-blue-600">{formatCurrency(totalSpent)}</p>
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between min-h-[80px] overflow-hidden">
+          <p className="text-sm text-slate-500 truncate">总花费</p>
+          <p className="text-xl font-bold text-blue-600 truncate">{formatCurrency(totalSpent)}</p>
         </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
-          <p className="text-sm text-slate-500">已付款</p>
-          <p className="text-xl font-bold text-emerald-600">{formatCurrency(totalPaid)}</p>
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between min-h-[80px] overflow-hidden">
+          <p className="text-sm text-slate-500 truncate">已付款</p>
+          <p className="text-xl font-bold text-emerald-600 truncate">{formatCurrency(totalPaid)}</p>
         </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
-          <p className="text-sm text-slate-500">待付款</p>
-          <p className="text-xl font-bold text-amber-600">{formatCurrency(totalSpent - totalPaid)}</p>
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between min-h-[80px] overflow-hidden">
+          <p className="text-sm text-slate-500 truncate">待付款</p>
+          <p className="text-xl font-bold text-amber-600 truncate">{formatCurrency(totalSpent - totalPaid)}</p>
         </div>
       </div>
 
@@ -274,6 +274,10 @@ export default function ProjectDetailPage() {
             totalPrice: editingItem.totalPrice || '',
             paidAmount: editingItem.paidAmount || '0',
             paymentDate: editingItem.paymentDate || '',
+            firstPaymentAmount: (editingItem as any).firstPaymentAmount || '',
+            firstPaymentDate: (editingItem as any).firstPaymentDate || '',
+            secondPaymentAmount: (editingItem as any).secondPaymentAmount || '',
+            secondPaymentDate: (editingItem as any).secondPaymentDate || '',
             expectedDeliveryDate: editingItem.expectedDeliveryDate || '',
             notes: ''
           } : undefined}

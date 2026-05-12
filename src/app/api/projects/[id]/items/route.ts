@@ -42,6 +42,7 @@ export async function POST(
     const {
       name, categoryId, materialTypeId, unit, quantity, unitPrice,
       totalPrice, paidAmount, paymentDate, expectedDeliveryDate,
+      firstPaymentAmount, firstPaymentDate, secondPaymentAmount, secondPaymentDate,
       reminderDays, notes
     } = body
 
@@ -74,6 +75,10 @@ export async function POST(
         paymentStatus,
         paymentDate: paymentDate ? new Date(paymentDate) : null,
         expectedDeliveryDate: expectedDeliveryDate ? new Date(expectedDeliveryDate) : null,
+        firstPaymentAmount: firstPaymentAmount ? parseFloat(firstPaymentAmount) : null,
+        firstPaymentDate: firstPaymentDate ? new Date(firstPaymentDate) : null,
+        secondPaymentAmount: secondPaymentAmount ? parseFloat(secondPaymentAmount) : null,
+        secondPaymentDate: secondPaymentDate ? new Date(secondPaymentDate) : null,
         reminderDays: reminderDays ? parseInt(reminderDays) : null,
         reminderDate,
         notes: notes || null

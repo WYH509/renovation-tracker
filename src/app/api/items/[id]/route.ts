@@ -13,6 +13,7 @@ export async function PUT(
     const {
       name, categoryId, materialTypeId, unit, quantity, unitPrice,
       totalPrice, paidAmount, paymentDate, expectedDeliveryDate,
+      firstPaymentAmount, firstPaymentDate, secondPaymentAmount, secondPaymentDate,
       isCompleted, reminderDays, notes
     } = body
 
@@ -54,6 +55,10 @@ export async function PUT(
         paymentStatus,
         paymentDate: paymentDate ? new Date(paymentDate) : null,
         expectedDeliveryDate: expectedDeliveryDate ? new Date(expectedDeliveryDate) : null,
+        firstPaymentAmount: firstPaymentAmount ? parseFloat(firstPaymentAmount) : null,
+        firstPaymentDate: firstPaymentDate ? new Date(firstPaymentDate) : null,
+        secondPaymentAmount: secondPaymentAmount ? parseFloat(secondPaymentAmount) : null,
+        secondPaymentDate: secondPaymentDate ? new Date(secondPaymentDate) : null,
         isCompleted: isCompleted || false,
         reminderDays: reminderDays ? parseInt(reminderDays) : null,
         reminderDate,

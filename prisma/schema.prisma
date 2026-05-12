@@ -54,6 +54,10 @@ model Item {
   paidAmount           Decimal?     @db.Decimal(10,2) @default(0)
   paymentStatus        String       @default("unpaid")
   paymentDate          DateTime?
+  firstPaymentAmount   Decimal?     @db.Decimal(10,2) @default(0)
+  firstPaymentDate     DateTime?
+  secondPaymentAmount  Decimal?     @db.Decimal(10,2) @default(0)
+  secondPaymentDate    DateTime?
   expectedDeliveryDate DateTime?
   actualCompletionDate DateTime?
   isCompleted          Boolean      @default(false)
