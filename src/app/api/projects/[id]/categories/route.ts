@@ -9,7 +9,8 @@ export async function GET(
     const projectId = parseInt(params.id)
     const categories = await prisma.category.findMany({
       where: { projectId },
-      orderBy: { sortOrder: 'asc' }
+      orderBy: { sortOrder: 'asc' },
+      distinct: ['name']
     })
     return NextResponse.json(categories)
   } catch (error) {

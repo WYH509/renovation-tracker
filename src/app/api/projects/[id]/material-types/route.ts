@@ -10,7 +10,8 @@ export async function GET(
 
     const materialTypes = await prisma.materialType.findMany({
       where: { projectId },
-      orderBy: { name: 'asc' }
+      orderBy: { name: 'asc' },
+      distinct: ['name']
     })
 
     return NextResponse.json(materialTypes)
