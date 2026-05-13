@@ -3,13 +3,15 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import { ArrowLeft, Calendar, Package, Edit2, Trash2, Plus, CheckCircle, Clock } from 'lucide-react'
+import { ArrowLeft, Calendar, Package, Edit2, Trash2, Plus, CheckCircle, Clock, X } from 'lucide-react'
+import ItemForm from '@/components/ItemForm'
 
 interface PaymentRecord {
   id: string
   label: string
   amount: number
   date: string | null
+  notes?: string
 }
 
 interface Item {
@@ -32,6 +34,16 @@ interface Item {
   secondPaymentDate: string | null
 }
 
+interface Category {
+  id: number
+  name: string
+}
+
+interface MaterialType {
+  id: number
+  name: string
+}
+
 export default function ItemDetailPage() {
   const params = useParams()
   const router = useRouter()
@@ -39,12 +51,17 @@ export default function ItemDetailPage() {
   const itemId = params.itemId as string
 
   const [item, setItem] = useState<Item | null>(null)
+  const [categories, setCategories] = useState<Category[]>([])
+  const [materialTypes, setMaterialTypes] = useState<MaterialType[]>([])
   const [loading, setLoading] = useState(true)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showAddPaymentModal, setShowAddPaymentModal] = useState(false)
+  const [editingPayment, setEditingPayment] = useState<PaymentRecord | null>(null)
 
   useEffect(() => {
     fetchItem()
+    fetchCategories()
   }, [itemId])
 
   const fetchItem = async () => {
@@ -61,6 +78,19 @@ export default function ItemDetailPage() {
     }
   }
 
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch(`/api/projects/${projectId}/categories`)
+      const data = await res.json()
+      setCategories(data)
+      const mtRes = await fetch(`/api/projects/${projectId}/material-types`)
+      const mtData = await mtRes.json()
+      setMaterialTypes(mtData || [])
+    } catch (error) {
+      console.error('Failed to fetch categories:', error)
+    }
+  }
+
   const handleDelete = async () => {
     if (!confirm('确定删除此采购项？删除后无法恢复。')) return
     try {
@@ -70,6 +100,22 @@ export default function ItemDetailPage() {
       }
     } catch (error) {
       console.error('Failed to delete item:', error)
+    }
+  }
+
+  const handleUpdateItem = async (formData: any) => {
+    try {
+      const res = await fetch(`/api/items/${itemId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+      if (res.ok) {
+        setShowEditModal(false)
+        fetchItem()
+      }
+    } catch (error) {
+      console.error('Failed to update item:', error)
     }
   }
 
@@ -104,21 +150,63 @@ export default function ItemDetailPage() {
       })
     }
     
-    // Add remaining paid amount as "其他付款" if there's a gap
-    const totalPaid = parseFloat(item.paidAmount || '0')
-    const recordedPaid = records.reduce((sum, r) => sum + r.amount, 0)
-    const remaining = totalPaid - recordedPaid
-    
-    if (remaining > 0.01) {
-      records.push({
-        id: 'other',
-        label: '其他付款',
-        amount: remaining,
-        date: item.paymentDate
-      })
-    }
-    
     return records
+  }
+
+  const handleAddPayment = async (paymentData: { amount: number; date: string; label: string }) => {
+    if (!item) return
+    
+    const currentFirst = parseFloat(item.firstPaymentAmount || '0')
+    const currentSecond = parseFloat(item.secondPaymentAmount || '0')
+    
+    let updateData: any = {}
+    
+    // Determine which payment slot to use based on existing payments
+    if (currentFirst <= 0) {
+      updateData = {
+        firstPaymentAmount: paymentData.amount.toString(),
+        firstPaymentDate: paymentData.date || null,
+        paidAmount: (parseFloat(item.paidAmount || '0') + paymentData.amount).toString()
+      }
+    } else if (currentSecond <= 0) {
+      updateData = {
+        secondPaymentAmount: paymentData.amount.toString(),
+        secondPaymentDate: paymentData.date || null,
+        paidAmount: (parseFloat(item.paidAmount || '0') + paymentData.amount).toString()
+      }
+    } else {
+      // All fixed slots full, update the last payment date and add to total
+      updateData = {
+        paidAmount: (parseFloat(item.paidAmount || '0') + paymentData.amount).toString(),
+        paymentDate: paymentData.date || null
+      }
+    }
+
+    // Auto-update payment status
+    const total = parseFloat(item.totalPrice || '0')
+    const newPaid = parseFloat(updateData.paidAmount)
+    if (newPaid >= total && total > 0) {
+      updateData.paymentStatus = 'paid'
+    } else if (newPaid > 0) {
+      updateData.paymentStatus = 'partial'
+    } else {
+      updateData.paymentStatus = 'unpaid'
+    }
+
+    try {
+      const res = await fetch(`/api/items/${itemId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData)
+      })
+      if (res.ok) {
+        setShowAddPaymentModal(false)
+        setEditingPayment(null)
+        fetchItem()
+      }
+    } catch (error) {
+      console.error('Failed to add payment:', error)
+    }
   }
 
   if (loading) {
@@ -147,7 +235,7 @@ export default function ItemDetailPage() {
   const paymentRecords = getPaymentRecords()
 
   return (
-    <div className="max-w-2xl mx-auto px-4 pb-24">
+    <div className="max-w-2xl mx-auto px-4 pb-32">
       {/* iOS Back Button & Title */}
       <div className="pt-2 mb-4">
         <div className="flex items-center gap-3">
@@ -157,8 +245,8 @@ export default function ItemDetailPage() {
           >
             <ArrowLeft size={20} className="text-gray-600" />
           </button>
-          <div className="flex-1">
-            <h1 className="ios-title text-gray-900">{item.name}</h1>
+          <div className="flex-1 min-w-0">
+            <h1 className="ios-title text-gray-900 truncate">{item.name}</h1>
           </div>
           <button 
             onClick={() => setShowEditModal(true)}
@@ -186,7 +274,7 @@ export default function ItemDetailPage() {
             <div>
               <p className="font-medium text-gray-900">{getStatusLabel(item.paymentStatus)}</p>
               <p className="text-xs text-gray-500">
-                {item.paymentDate ? `付款日期: ${formatDate(item.paymentDate)}` : '暂无付款记录'}
+                {item.paymentDate ? `最后付款: ${formatDate(item.paymentDate)}` : '暂无付款记录'}
               </p>
             </div>
           </div>
@@ -202,17 +290,17 @@ export default function ItemDetailPage() {
       {/* Amount Summary */}
       <div className="ios-card p-4 mb-4">
         <div className="grid grid-cols-3 gap-4">
-          <div className="text-center">
+          <div className="text-center min-w-0">
             <p className="text-xs text-gray-500 mb-1">总价</p>
-            <p className="text-lg font-bold text-gray-900 ios-money">{formatCurrency(total)}</p>
+            <p className="text-base font-bold text-gray-900" style={{fontVariantNumeric:'tabular-nums', wordBreak:'break-all', fontSize:'14px'}}>{formatCurrency(total)}</p>
           </div>
-          <div className="text-center">
+          <div className="text-center min-w-0">
             <p className="text-xs text-gray-500 mb-1">已付</p>
-            <p className="text-lg font-bold text-ios-green ios-money">{formatCurrency(paid)}</p>
+            <p className="text-base font-bold text-ios-green" style={{fontVariantNumeric:'tabular-nums', wordBreak:'break-all', fontSize:'14px'}}>{formatCurrency(paid)}</p>
           </div>
-          <div className="text-center">
+          <div className="text-center min-w-0">
             <p className="text-xs text-gray-500 mb-1">待付</p>
-            <p className="text-lg font-bold text-ios-orange ios-money">{formatCurrency(unpaid)}</p>
+            <p className="text-base font-bold text-ios-orange" style={{fontVariantNumeric:'tabular-nums', wordBreak:'break-all', fontSize:'14px'}}>{formatCurrency(unpaid)}</p>
           </div>
         </div>
       </div>
@@ -222,10 +310,11 @@ export default function ItemDetailPage() {
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">付款明细</h3>
           <button 
-            onClick={() => setShowEditModal(true)}
-            className="text-xs text-ios-blue font-medium"
+            onClick={() => { setEditingPayment(null); setShowAddPaymentModal(true) }}
+            className="flex items-center gap-1 text-xs text-ios-blue font-medium"
           >
-            编辑
+            <Plus size={14} />
+            新增付款
           </button>
         </div>
         
@@ -235,22 +324,24 @@ export default function ItemDetailPage() {
           <div className="space-y-2">
             {paymentRecords.map((record) => (
               <div key={record.id} className="ios-payment-card">
-                <div>
+                <div className="flex-1 min-w-0">
                   <p className="ios-payment-label">{record.label}</p>
                   {record.date && (
                     <p className="text-xs text-gray-400">{formatDate(record.date)}</p>
                   )}
                 </div>
-                <p className="ios-payment-amount text-ios-green">
-                  {formatCurrency(record.amount)}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="ios-payment-amount text-ios-green">
+                    {formatCurrency(record.amount)}
+                  </p>
+                </div>
               </div>
             ))}
             
             {/* Total Paid Summary */}
             <div className="pt-2 mt-2 border-t border-gray-200 flex justify-between">
               <span className="text-sm font-medium text-gray-700">已付总额</span>
-              <span className="text-base font-bold text-ios-green ios-money">
+              <span className="text-base font-bold text-ios-green" style={{fontVariantNumeric:'tabular-nums'}}>
                 {formatCurrency(paid)}
               </span>
             </div>
@@ -301,48 +392,72 @@ export default function ItemDetailPage() {
         </div>
       </div>
 
-      {/* Bottom Action Bar */}
+      {/* Bottom Action Bar - iOS Style */}
       <div className="ios-bottom-bar">
         <div className="flex gap-3">
           <button
             onClick={() => setShowEditModal(true)}
-            className="ios-bottom-btn ios-bottom-btn-primary"
+            className="ios-bottom-btn ios-bottom-btn-primary flex items-center justify-center gap-2"
           >
+            <Edit2 size={16} />
             编辑
           </button>
           <button
             onClick={() => setShowDeleteConfirm(true)}
-            className="ios-bottom-btn ios-bottom-btn-danger"
+            className="ios-bottom-btn ios-bottom-btn-danger flex items-center justify-center gap-2"
           >
+            <Trash2 size={16} />
             删除
           </button>
         </div>
       </div>
 
-      {/* Edit Modal - Use ItemForm */}
+      {/* Edit Modal - Use ItemForm Component */}
       {showEditModal && (
-        <div className="ios-modal-overlay" onClick={() => setShowEditModal(false)}>
-          <div className="ios-modal-content max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="sticky top-0 bg-white z-10 flex items-center justify-between p-4 border-b border-gray-200">
-              <h2 className="ios-title text-gray-900">编辑采购项</h2>
+        <ItemForm
+          categories={categories}
+          materialTypes={materialTypes}
+          initialData={item ? {
+            name: item.name,
+            categoryId: item.category.id,
+            materialTypeId: item.materialType?.id,
+            unit: item.unit || '',
+            quantity: item.quantity || '',
+            unitPrice: '',
+            totalPrice: item.totalPrice || '',
+            paidAmount: item.paidAmount || '0',
+            paymentDate: item.paymentDate || '',
+            firstPaymentAmount: item.firstPaymentAmount || '',
+            firstPaymentDate: item.firstPaymentDate || '',
+            secondPaymentAmount: item.secondPaymentAmount || '',
+            secondPaymentDate: item.secondPaymentDate || '',
+            expectedDeliveryDate: item.expectedDeliveryDate ? item.expectedDeliveryDate.split('T')[0] : '',
+            notes: item.notes || ''
+          } : undefined}
+          onSubmit={handleUpdateItem}
+          onClose={() => setShowEditModal(false)}
+        />
+      )}
+
+      {/* Add Payment Modal */}
+      {showAddPaymentModal && (
+        <div className="ios-modal-overlay" onClick={() => { setShowAddPaymentModal(false); setEditingPayment(null) }}>
+          <div className="ios-modal-content p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="ios-title text-gray-900">新增付款记录</h2>
               <button 
-                onClick={() => setShowEditModal(false)}
+                onClick={() => { setShowAddPaymentModal(false); setEditingPayment(null) }}
                 className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500"
               >
                 ✕
               </button>
             </div>
-            <div className="p-4">
-              <p className="text-sm text-gray-500 text-center py-8">
-                编辑功能将通过表单组件加载
-              </p>
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="ios-btn-filled"
-              >
-                关闭
-              </button>
-            </div>
+            
+            <AddPaymentForm 
+              onSubmit={handleAddPayment}
+              onClose={() => { setShowAddPaymentModal(false); setEditingPayment(null) }}
+              existingLabels={paymentRecords.map(r => r.label)}
+            />
           </div>
         </div>
       )}
@@ -378,5 +493,78 @@ export default function ItemDetailPage() {
         </div>
       )}
     </div>
+  )
+}
+
+// Add Payment Form Component
+function AddPaymentForm({ onSubmit, onClose, existingLabels }: { onSubmit: (data: { amount: number; date: string; label: string }) => void; onClose: () => void; existingLabels: string[] }) {
+  const [amount, setAmount] = useState('')
+  const [date, setDate] = useState('')
+  const [label, setLabel] = useState('')
+
+  const labelOptions = ['定金', '第二笔', '第三笔', '尾款', '进度款', '验收款']
+  const availableLabels = labelOptions.filter(l => !existingLabels.includes(l) || label === l)
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!amount || parseFloat(amount) <= 0) return
+    onSubmit({ amount: parseFloat(amount), date, label: label || '付款' })
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="ios-label">付款标签</label>
+        <select
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          className="ios-input"
+        >
+          <option value="">选择标签</option>
+          {availableLabels.map(l => (
+            <option key={l} value={l}>{l}</option>
+          ))}
+          <option value="custom">自定义...</option>
+        </select>
+        {label === 'custom' && (
+          <input
+            type="text"
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            placeholder="输入自定义标签"
+            className="ios-input mt-2"
+          />
+        )}
+      </div>
+      <div>
+        <label className="ios-label">付款金额 (元)</label>
+        <input
+          type="number"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          step="0.01"
+          required
+          className="ios-input"
+          placeholder="如：5000"
+        />
+      </div>
+      <div>
+        <label className="ios-label">付款日期</label>
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="ios-input"
+        />
+      </div>
+      <div className="flex gap-3 pt-2">
+        <button type="button" onClick={onClose} className="ios-bottom-btn ios-bottom-btn-secondary">
+          取消
+        </button>
+        <button type="submit" className="ios-bottom-btn ios-bottom-btn-primary">
+          确认
+        </button>
+      </div>
+    </form>
   )
 }

@@ -166,26 +166,26 @@ export default function ProjectDetailPage() {
 
       {/* iOS Stat Cards - Full Width Amounts */}
       <div className="grid grid-cols-3 gap-3 mb-4">
-        <div className="ios-stat-card-lg text-center">
+        <div className="ios-stat-card-lg text-center min-w-0">
           <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center mx-auto mb-2">
             <Wallet size={16} className="text-ios-blue" />
           </div>
           <p className="text-xs text-gray-500 mb-1">总花费</p>
-          <p className="ios-full-amount text-gray-900">{formatCurrency(totalSpent)}</p>
+          <p className="stat-amount-full text-gray-900" style={{fontSize:'13px', wordBreak:'break-all'}}>{formatCurrency(totalSpent)}</p>
         </div>
-        <div className="ios-stat-card-lg text-center">
+        <div className="ios-stat-card-lg text-center min-w-0">
           <div className="w-9 h-9 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-2">
             <CreditCard size={16} className="text-ios-green" />
           </div>
           <p className="text-xs text-gray-500 mb-1">已付款</p>
-          <p className="ios-full-amount text-ios-green">{formatCurrency(totalPaid)}</p>
+          <p className="stat-amount-full text-ios-green" style={{fontSize:'13px', wordBreak:'break-all'}}>{formatCurrency(totalPaid)}</p>
         </div>
-        <div className="ios-stat-card-lg text-center">
+        <div className="ios-stat-card-lg text-center min-w-0">
           <div className="w-9 h-9 rounded-full bg-orange-50 flex items-center justify-center mx-auto mb-2">
             <Clock size={16} className="text-ios-orange" />
           </div>
           <p className="text-xs text-gray-500 mb-1">待付款</p>
-          <p className="ios-full-amount text-ios-orange">{formatCurrency(totalSpent - totalPaid)}</p>
+          <p className="stat-amount-full text-ios-orange" style={{fontSize:'13px', wordBreak:'break-all'}}>{formatCurrency(totalSpent - totalPaid)}</p>
         </div>
       </div>
 
@@ -254,7 +254,7 @@ export default function ProjectDetailPage() {
         </button>
       )}
 
-      {/* iOS Bottom Tab Bar */}
+      {/* iOS Bottom Tab Bar - iOS Native Style */}
       <div className="ios-page-tab-bar">
         <button
           onClick={() => setActiveTab('items')}

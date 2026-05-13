@@ -126,18 +126,18 @@ export default function ItemList({ items, projectId, onEdit, onDelete }: ItemLis
             </div>
 
             {/* Payment Info - Full Amount Display */}
-            <div className="grid grid-cols-3 gap-2 p-3 bg-gray-50 rounded-lg">
-              <div className="text-center">
+            <div className="grid grid-cols-3 gap-2 p-3 bg-gray-50 rounded-lg min-w-0">
+              <div className="text-center min-w-0">
                 <p className="text-xs text-gray-500 mb-0.5">总价</p>
-                <p className="text-sm font-bold text-gray-900 ios-money">{formatCurrency(total)}</p>
+                <p className="text-sm font-bold text-gray-900" style={{fontVariantNumeric:'tabular-nums', wordBreak:'break-all', fontSize:'12px'}}>{formatCurrency(total)}</p>
               </div>
-              <div className="text-center">
+              <div className="text-center min-w-0">
                 <p className="text-xs text-gray-500 mb-0.5">已付</p>
-                <p className="text-sm font-bold text-ios-green ios-money">{formatCurrency(paid)}</p>
+                <p className="text-sm font-bold text-ios-green" style={{fontVariantNumeric:'tabular-nums', wordBreak:'break-all', fontSize:'12px'}}>{formatCurrency(paid)}</p>
               </div>
-              <div className="text-center">
+              <div className="text-center min-w-0">
                 <p className="text-xs text-gray-500 mb-0.5">待付</p>
-                <p className="text-sm font-bold text-ios-orange ios-money">{formatCurrency(unpaid)}</p>
+                <p className="text-sm font-bold text-ios-orange" style={{fontVariantNumeric:'tabular-nums', wordBreak:'break-all', fontSize:'12px'}}>{formatCurrency(unpaid)}</p>
               </div>
             </div>
 

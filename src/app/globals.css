@@ -93,14 +93,21 @@ img, video, table, div {
     @apply border-t border-gray-200/50;
   }
 
-  /* iOS Page Tab Bar - for tabs within a page (like project detail) */
+  /* iOS Page Tab Bar - fixed bottom tab bar */
   .ios-page-tab-bar {
-    @apply flex items-center justify-around bg-white border-b border-gray-200;
+    @apply fixed bottom-0 left-0 right-0 z-40;
+    @apply flex items-center justify-around bg-white;
+    @apply border-t border-gray-200;
+    @apply safe-area-pb;
+    height: calc(60px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   .ios-page-tab-item {
-    @apply flex-1 flex flex-col items-center justify-center py-3 text-gray-400;
+    @apply flex flex-col items-center justify-center gap-1;
+    @apply py-3 px-4 text-gray-400;
     @apply transition-colors relative;
+    flex: 1;
   }
 
   .ios-page-tab-item.active {
@@ -109,7 +116,10 @@ img, video, table, div {
 
   .ios-page-tab-item.active::after {
     content: '';
-    @apply absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-ios-blue rounded-full;
+    @apply absolute top-0 left-1/2 -translate-x-1/2;
+    width: 32px; height: 3px;
+    background: #007AFF;
+    border-radius: 0 0 2px 2px;
   }
 
   /* iOS Modal Overlay */
@@ -338,8 +348,22 @@ img, video, table, div {
 
   /* iOS Full Width Amount - for stats cards */
   .ios-full-amount {
-    @apply text-xl font-bold tabular-nums tracking-tight;
+    @apply text-lg font-bold tabular-nums tracking-tight;
     word-break: break-all;
+    white-space: normal;
+    min-width: 0;
+    overflow: visible;
+  }
+
+  /* Stat card amounts - ensure full display without truncation */
+  .stat-amount-full {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+    max-width: 100%;
+    font-size: 15px;
+    font-weight: 700;
   }
 
   /* iOS Detail Section */
