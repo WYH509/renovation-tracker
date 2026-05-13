@@ -189,21 +189,21 @@ export default function ProjectDetailPage() {
             <Wallet size={16} className="text-ios-blue" />
           </div>
           <p className="text-xs text-gray-500 mb-0.5">总花费</p>
-          <p className="font-bold text-gray-900 text-sm truncate">{formatCurrency(totalSpent)}</p>
+          <p className="font-bold text-gray-900 text-sm truncate ios-money">{formatCurrency(totalSpent)}</p>
         </div>
         <div className="ios-card p-3 text-center">
           <div className="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-1">
             <CreditCard size={16} className="text-ios-green" />
           </div>
           <p className="text-xs text-gray-500 mb-0.5">已付款</p>
-          <p className="font-bold text-ios-green text-sm truncate">{formatCurrency(totalPaid)}</p>
+          <p className="font-bold text-ios-green text-sm truncate ios-money">{formatCurrency(totalPaid)}</p>
         </div>
         <div className="ios-card p-3 text-center">
           <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center mx-auto mb-1">
             <Clock size={16} className="text-ios-orange" />
           </div>
           <p className="text-xs text-gray-500 mb-0.5">待付款</p>
-          <p className="font-bold text-ios-orange text-sm truncate">{formatCurrency(totalSpent - totalPaid)}</p>
+          <p className="font-bold text-ios-orange text-sm truncate ios-money">{formatCurrency(totalSpent - totalPaid)}</p>
         </div>
       </div>
 

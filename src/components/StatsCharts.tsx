@@ -26,11 +26,11 @@ export default function StatsCharts({ data }: { data: StatsData }) {
         <div className="grid grid-cols-2 gap-3 mb-5">
           <div className="bg-gray-50 rounded-lg p-3">
             <p className="text-xs text-gray-500 mb-1">总花费</p>
-            <p className="text-lg font-bold text-gray-900">{formatCurrency(data.totalSpent)}</p>
+            <p className="text-lg font-bold text-gray-900 ios-money">{formatCurrency(data.totalSpent)}</p>
           </div>
           <div className="bg-gray-50 rounded-lg p-3">
             <p className="text-xs text-gray-500 mb-1">已付款</p>
-            <p className="text-lg font-bold text-ios-green">{formatCurrency(data.totalPaid)}</p>
+            <p className="text-lg font-bold text-ios-green ios-money">{formatCurrency(data.totalPaid)}</p>
           </div>
         </div>
 
@@ -96,7 +96,7 @@ export default function StatsCharts({ data }: { data: StatsData }) {
                     <span className="text-gray-900 font-medium">{cat.name}</span>
                   </div>
                   <div className="text-right">
-                    <p className="text-gray-900 font-semibold">{formatCurrency(cat.spent)}</p>
+                    <p className="text-gray-900 font-semibold ios-money">{formatCurrency(cat.spent)}</p>
                     <p className="text-xs text-gray-500">{formatCurrency(cat.paid)} 已付 · {formatCurrency(unpaid)} 待付</p>
                   </div>
                 </div>

@@ -24,7 +24,7 @@ export default function RootLayout({
     <html lang="zh-CN">
       <body className="bg-ios-bg min-h-screen">
         <Navbar />
-        <main className="pb-20 pt-2">
+        <main className="pb-20 pt-2 px-4 max-w-2xl mx-auto">
           {children}
         </main>
       </body>

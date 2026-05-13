@@ -46,7 +46,7 @@ export default function ProjectCard({ project }: { project: Project }) {
             </div>
             <div>
               <p className="text-xs text-gray-500">总花费</p>
-              <p className="font-semibold text-gray-900">{formatCurrency(project.totalSpent)}</p>
+              <p className="font-semibold text-gray-900 ios-money truncate max-w-[100px]">{formatCurrency(project.totalSpent)}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -55,7 +55,7 @@ export default function ProjectCard({ project }: { project: Project }) {
             </div>
             <div>
               <p className="text-xs text-gray-500">已付</p>
-              <p className="font-semibold text-ios-green">{formatCurrency(project.totalPaid)}</p>
+              <p className="font-semibold text-ios-green ios-money truncate max-w-[100px]">{formatCurrency(project.totalPaid)}</p>
             </div>
           </div>
         </div>

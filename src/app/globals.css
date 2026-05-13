@@ -16,6 +16,13 @@
 
 * {
   -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -24,6 +31,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: #F2F2F7;
   color: #000000;
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Prevent horizontal overflow globally */
+img, video, table, div {
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 /* iOS 14pt List Style */
@@ -53,14 +68,6 @@ body {
   .ios-btn-secondary {
     @apply w-full py-3 bg-gray-100 text-ios-blue rounded-ios font-medium text-base;
     @apply active:opacity-80 transition-opacity;
-  }
-
-  /* iOS Input */
-  .ios-input {
-    @apply w-full px-4 py-3 bg-gray-100 rounded-ios text-base;
-    @apply placeholder:text-gray-400 outline-none;
-    @apply focus:ring-2 focus:ring-ios-blue focus:bg-white;
-    @apply transition-all duration-200;
   }
 
   /* iOS Form Label */
@@ -129,6 +136,116 @@ body {
   .ios-divider {
     @apply h-px bg-gray-200/60 mx-4;
   }
+
+  /* iOS Table Container - Mobile Horizontal Scroll */
+  .ios-table-container {
+    @apply bg-white rounded-ios shadow-ios overflow-hidden;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* iOS Table */
+  .ios-table {
+    @apply w-full min-w-[600px];
+    border-collapse: collapse;
+  }
+
+  .ios-table thead {
+    @apply bg-gray-50 border-b border-gray-200;
+  }
+
+  .ios-table th {
+    @apply text-xs font-medium text-gray-500 uppercase tracking-wide;
+    @apply py-3 px-3 text-left;
+  }
+
+  .ios-table td {
+    @apply py-3 px-3 text-sm text-gray-900;
+    @apply border-b border-gray-100;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+  }
+
+  .ios-table tr:last-child td {
+    @apply border-b-0;
+  }
+
+  .ios-table tbody tr:active {
+    @apply bg-gray-50;
+  }
+
+  /* iOS Amount Text - Fixed Width for alignment */
+  .ios-amount {
+    @apply font-medium tabular-nums;
+    white-space: nowrap;
+  }
+
+  .ios-amount-positive {
+    @apply text-ios-green;
+  }
+
+  .ios-amount-negative {
+    @apply text-ios-red;
+  }
+
+  .ios-amount-neutral {
+    @apply text-gray-900;
+  }
+
+  /* iOS Action Buttons */
+  .ios-action-btn {
+    @apply px-3 py-1.5 rounded-lg text-xs font-medium transition-colors;
+  }
+
+  .ios-action-btn-edit {
+    @apply bg-blue-50 text-ios-blue active:bg-blue-100;
+  }
+
+  .ios-action-btn-delete {
+    @apply bg-red-50 text-ios-red active:bg-red-100;
+  }
+
+  /* iOS Status Badge */
+  .ios-status {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
+  }
+
+  .ios-status-paid {
+    @apply bg-green-100 text-ios-green;
+  }
+
+  .ios-status-partial {
+    @apply bg-orange-100 text-ios-orange;
+  }
+
+  .ios-status-unpaid {
+    @apply bg-red-100 text-ios-red;
+  }
+
+  /* iOS List Row - Card Style */
+  .ios-list-row {
+    @apply flex items-center justify-between py-3 px-4;
+    @apply border-b border-gray-100 last:border-b-0;
+    @apply active:bg-gray-50 transition-colors;
+  }
+
+  .ios-list-row-content {
+    @apply flex-1 min-w-0 mr-3;
+  }
+
+  .ios-list-row-title {
+    @apply text-sm font-medium text-gray-900 truncate;
+  }
+
+  .ios-list-row-subtitle {
+    @apply text-xs text-gray-500 mt-0.5 truncate;
+  }
+
+  .ios-list-row-action {
+    @apply flex-shrink-0;
+  }
 }
 
 /* Safe area padding for iPhone notch */
@@ -191,7 +308,57 @@ body {
   @apply text-xs text-gray-500;
 }
 
+/* iOS Money Display */
+.ios-money {
+  @apply text-sm font-semibold tabular-nums;
+}
+
+/* Mobile Responsive Fixes */
+@media (max-width: 640px) {
+  /* Force horizontal scroll for tables on mobile */
+  .overflow-x-auto {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent text from causing overflow */
+  .truncate, .text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Fix max-width issues on mobile */
+  .max-w-6xl {
+    max-width: 100%;
+  }
+
+  .max-w-2xl {
+    max-width: 100%;
+  }
+
+  /* Fix padding on mobile */
+  .container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
 /* Remove iOS tap highlight on buttons */
 button, a {
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Money/Amount specific fixes */
+.money-display {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Ensure inputs don't overflow */
+input, select, textarea {
+  max-width: 100%;
 }
