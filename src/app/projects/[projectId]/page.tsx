@@ -1,11 +1,11 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import ItemList from '../../../components/ItemList'
 import ItemForm from '../../../components/ItemForm'
-import { ArrowLeft, Plus, FolderKanban, BarChart3, Bell, Edit2, Trash2 } from 'lucide-react'
+import { ArrowLeft, Plus, FolderKanban, BarChart3, Bell, Edit2, Trash2, Wallet, Clock, CreditCard, ChevronRight } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 
 interface Category { id: number; name: string }
@@ -140,89 +140,111 @@ export default function ProjectDetailPage() {
   }
 
   if (loading) {
-    return <div className="text-center py-12 text-slate-400">加载中...</div>
+    return (
+      <div className="max-w-2xl mx-auto px-4">
+        <div className="ios-card p-8 text-center">
+          <p className="text-gray-400">加载中...</p>
+        </div>
+      </div>
+    )
   }
 
   if (!project) {
-    return <div className="text-center py-12 text-slate-400">项目不存在</div>
+    return (
+      <div className="max-w-2xl mx-auto px-4">
+        <div className="ios-card p-8 text-center">
+          <p className="text-gray-400">项目不存在</p>
+        </div>
+      </div>
+    )
   }
 
   const totalSpent = items.reduce((sum, i) => sum + parseFloat(i.totalPrice || '0'), 0)
   const totalPaid = items.reduce((sum, i) => sum + parseFloat(i.paidAmount || '0'), 0)
 
   return (
-    <div className="space-y-6">
-      {/* 顶部导航 */}
-      <div className="flex items-center gap-4">
-        <button onClick={() => router.push('/')} className="p-2 hover:bg-slate-100 rounded-lg">
-          <ArrowLeft size={20} className="text-slate-600" />
-        </button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-slate-800">{project.name}</h1>
-          {project.description && (
-            <p className="text-sm text-slate-500 mt-1">{project.description}</p>
-          )}
+    <div className="max-w-2xl mx-auto px-4 space-y-6">
+      {/* iOS Back Button & Title */}
+      <div className="pt-2">
+        <div className="flex items-center gap-3 mb-4">
+          <button 
+            onClick={() => router.push('/')} 
+            className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center active:bg-gray-200 transition-colors"
+          >
+            <ArrowLeft size={20} className="text-gray-600" />
+          </button>
+          <div className="flex-1">
+            <h1 className="ios-title text-gray-900">{project.name}</h1>
+            {project.description && (
+              <p className="text-sm text-gray-500 mt-0.5">{project.description}</p>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* 统计卡片 - 固定高度避免溢出重叠 */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between min-h-[80px] overflow-hidden">
-          <p className="text-sm text-slate-500 truncate">总花费</p>
-          <p className="text-xl font-bold text-blue-600 truncate">{formatCurrency(totalSpent)}</p>
+      {/* iOS Stat Cards */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="ios-card p-3 text-center">
+          <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center mx-auto mb-1">
+            <Wallet size={16} className="text-ios-blue" />
+          </div>
+          <p className="text-xs text-gray-500 mb-0.5">总花费</p>
+          <p className="font-bold text-gray-900 text-sm truncate">{formatCurrency(totalSpent)}</p>
         </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between min-h-[80px] overflow-hidden">
-          <p className="text-sm text-slate-500 truncate">已付款</p>
-          <p className="text-xl font-bold text-emerald-600 truncate">{formatCurrency(totalPaid)}</p>
+        <div className="ios-card p-3 text-center">
+          <div className="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-1">
+            <CreditCard size={16} className="text-ios-green" />
+          </div>
+          <p className="text-xs text-gray-500 mb-0.5">已付款</p>
+          <p className="font-bold text-ios-green text-sm truncate">{formatCurrency(totalPaid)}</p>
         </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between min-h-[80px] overflow-hidden">
-          <p className="text-sm text-slate-500 truncate">待付款</p>
-          <p className="text-xl font-bold text-amber-600 truncate">{formatCurrency(totalSpent - totalPaid)}</p>
+        <div className="ios-card p-3 text-center">
+          <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center mx-auto mb-1">
+            <Clock size={16} className="text-ios-orange" />
+          </div>
+          <p className="text-xs text-gray-500 mb-0.5">待付款</p>
+          <p className="font-bold text-ios-orange text-sm truncate">{formatCurrency(totalSpent - totalPaid)}</p>
         </div>
       </div>
 
-      {/* Tab 切换 */}
-      <div className="flex gap-2 border-b border-slate-200">
-        <button
-          onClick={() => setActiveTab('items')}
-          className={`flex items-center gap-2 px-4 py-2 border-b-2 font-medium ${
-            activeTab === 'items' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
-          }`}
-        >
-          <FolderKanban size={16} />
-          采购项
-        </button>
-        <button
-          onClick={() => setActiveTab('reports')}
-          className={`flex items-center gap-2 px-4 py-2 border-b-2 font-medium ${
-            activeTab === 'reports' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
-          }`}
-        >
-          <BarChart3 size={16} />
-          数据报表
-        </button>
-        <button
-          onClick={() => setActiveTab('reminders')}
-          className={`flex items-center gap-2 px-4 py-2 border-b-2 font-medium ${
-            activeTab === 'reminders' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
-          }`}
-        >
-          <Bell size={16} />
-          提醒
-        </button>
+      {/* iOS Segmented Control */}
+      <div className="flex justify-center">
+        <div className="ios-segmented">
+          <button
+            onClick={() => setActiveTab('items')}
+            className={`ios-segmented-btn ${activeTab === 'items' ? 'active' : ''}`}
+          >
+            <FolderKanban size={16} className="inline mr-1" />
+            采购项
+          </button>
+          <button
+            onClick={() => setActiveTab('reports')}
+            className={`ios-segmented-btn ${activeTab === 'reports' ? 'active' : ''}`}
+          >
+            <BarChart3 size={16} className="inline mr-1" />
+            报表
+          </button>
+          <button
+            onClick={() => setActiveTab('reminders')}
+            className={`ios-segmented-btn ${activeTab === 'reminders' ? 'active' : ''}`}
+          >
+            <Bell size={16} className="inline mr-1" />
+            提醒
+          </button>
+        </div>
       </div>
 
-      {/* 内容区 */}
+      {/* Content Area */}
       {activeTab === 'items' && (
         <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <p className="text-sm text-slate-500">共 {items.length} 个采购项</p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-500">共 {items.length} 个采购项</p>
             <button
               onClick={() => { setEditingItem(null); setShowItemForm(true) }}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+              className="flex items-center gap-1 px-4 py-2 bg-ios-blue text-white rounded-lg text-sm font-medium active:opacity-80"
             >
-              <Plus size={18} />
-              添加采购项
+              <Plus size={16} />
+              添加
             </button>
           </div>
           <ItemList items={items} onEdit={handleEditItem} onDelete={handleDeleteItem} />
@@ -230,32 +252,42 @@ export default function ProjectDetailPage() {
       )}
 
       {activeTab === 'reports' && (
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-          <p className="text-slate-500 text-center py-8">数据报表功能开发中...</p>
+        <div className="ios-card p-6">
+          <p className="text-center text-gray-400 py-4">数据报表功能开发中...</p>
           <div className="flex gap-3 justify-center">
             <a
               href={`/api/export?projectId=${projectId}&format=excel`}
-              className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium"
+              className="flex items-center gap-2 px-5 py-2.5 bg-ios-green text-white rounded-lg text-sm font-medium active:opacity-80"
             >
-              导出 Excel
+              Excel
             </a>
             <a
               href={`/api/export?projectId=${projectId}&format=pdf`}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
+              className="flex items-center gap-2 px-5 py-2.5 bg-ios-red text-white rounded-lg text-sm font-medium active:opacity-80"
             >
-              导出 PDF
+              PDF
             </a>
           </div>
         </div>
       )}
 
       {activeTab === 'reminders' && (
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-          <p className="text-slate-500 text-center py-8">提醒功能开发中...</p>
+        <div className="ios-card p-6">
+          <p className="text-center text-gray-400 py-4">提醒功能开发中...</p>
         </div>
       )}
 
-      {/* 添加/编辑采购项弹窗 */}
+      {/* iOS FAB Button */}
+      {activeTab === 'items' && (
+        <button
+          onClick={() => { setEditingItem(null); setShowItemForm(true) }}
+          className="fixed bottom-24 right-4 w-14 h-14 bg-ios-blue text-white rounded-full shadow-lg flex items-center justify-center active:scale-95 transition-transform z-40"
+        >
+          <Plus size={24} strokeWidth={2.5} />
+        </button>
+      )}
+
+      {/* Item Form Modal - Keep original ItemForm component */}
       {showItemForm && (
         <ItemForm
           categories={categories}
