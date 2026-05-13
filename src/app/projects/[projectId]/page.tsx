@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import Link from 'next/link'
 import ItemList from '../../../components/ItemList'
 import ItemForm from '../../../components/ItemForm'
-import { ArrowLeft, Plus, FolderKanban, BarChart3, Bell, Edit2, Trash2, Wallet, Clock, CreditCard, ChevronRight } from 'lucide-react'
+import { ArrowLeft, FolderKanban, BarChart3, Bell, Plus, Wallet, Clock, CreditCard } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 
 interface Category { id: number; name: string }
@@ -22,6 +21,10 @@ interface Item {
   expectedDeliveryDate: string | null
   isCompleted: boolean
   category: { name: string }
+  firstPaymentAmount?: string | null
+  firstPaymentDate?: string | null
+  secondPaymentAmount?: string | null
+  secondPaymentDate?: string | null
 }
 
 export default function ProjectDetailPage() {
@@ -33,8 +36,6 @@ export default function ProjectDetailPage() {
   const [items, setItems] = useState<Item[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [materialTypes, setMaterialTypes] = useState<MaterialType[]>([])
-  const [newMaterialTypeName, setNewMaterialTypeName] = useState('')
-  const [showMaterialTypeInput, setShowMaterialTypeInput] = useState(false)
   const [loading, setLoading] = useState(true)
   const [showItemForm, setShowItemForm] = useState(false)
   const [editingItem, setEditingItem] = useState<Item | null>(null)
@@ -66,25 +67,6 @@ export default function ProjectDetailPage() {
       console.error('Failed to fetch project data:', error)
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleCreateMaterialType = async () => {
-    if (!newMaterialTypeName.trim()) return
-    try {
-      const res = await fetch(`/api/projects/${projectId}/material-types`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newMaterialTypeName.trim() })
-      })
-      if (res.ok) {
-        const newType = await res.json()
-        setMaterialTypes(prev => [...prev, newType])
-        setNewMaterialTypeName('')
-        setShowMaterialTypeInput(false)
-      }
-    } catch (error) {
-      console.error('Failed to create material type:', error)
     }
   }
 
@@ -163,10 +145,10 @@ export default function ProjectDetailPage() {
   const totalPaid = items.reduce((sum, i) => sum + parseFloat(i.paidAmount || '0'), 0)
 
   return (
-    <div className="max-w-2xl mx-auto px-4 space-y-6">
+    <div className="max-w-2xl mx-auto px-4 pb-24">
       {/* iOS Back Button & Title */}
-      <div className="pt-2">
-        <div className="flex items-center gap-3 mb-4">
+      <div className="pt-2 mb-4">
+        <div className="flex items-center gap-3">
           <button 
             onClick={() => router.push('/')} 
             className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center active:bg-gray-200 transition-colors"
@@ -182,55 +164,28 @@ export default function ProjectDetailPage() {
         </div>
       </div>
 
-      {/* iOS Stat Cards */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="ios-card p-3 text-center">
-          <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center mx-auto mb-1">
+      {/* iOS Stat Cards - Full Width Amounts */}
+      <div className="grid grid-cols-3 gap-3 mb-4">
+        <div className="ios-stat-card-lg text-center">
+          <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center mx-auto mb-2">
             <Wallet size={16} className="text-ios-blue" />
           </div>
-          <p className="text-xs text-gray-500 mb-0.5">总花费</p>
-          <p className="font-bold text-gray-900 text-sm truncate ios-money">{formatCurrency(totalSpent)}</p>
+          <p className="text-xs text-gray-500 mb-1">总花费</p>
+          <p className="ios-full-amount text-gray-900">{formatCurrency(totalSpent)}</p>
         </div>
-        <div className="ios-card p-3 text-center">
-          <div className="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-1">
+        <div className="ios-stat-card-lg text-center">
+          <div className="w-9 h-9 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-2">
             <CreditCard size={16} className="text-ios-green" />
           </div>
-          <p className="text-xs text-gray-500 mb-0.5">已付款</p>
-          <p className="font-bold text-ios-green text-sm truncate ios-money">{formatCurrency(totalPaid)}</p>
+          <p className="text-xs text-gray-500 mb-1">已付款</p>
+          <p className="ios-full-amount text-ios-green">{formatCurrency(totalPaid)}</p>
         </div>
-        <div className="ios-card p-3 text-center">
-          <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center mx-auto mb-1">
+        <div className="ios-stat-card-lg text-center">
+          <div className="w-9 h-9 rounded-full bg-orange-50 flex items-center justify-center mx-auto mb-2">
             <Clock size={16} className="text-ios-orange" />
           </div>
-          <p className="text-xs text-gray-500 mb-0.5">待付款</p>
-          <p className="font-bold text-ios-orange text-sm truncate ios-money">{formatCurrency(totalSpent - totalPaid)}</p>
-        </div>
-      </div>
-
-      {/* iOS Segmented Control */}
-      <div className="flex justify-center">
-        <div className="ios-segmented">
-          <button
-            onClick={() => setActiveTab('items')}
-            className={`ios-segmented-btn ${activeTab === 'items' ? 'active' : ''}`}
-          >
-            <FolderKanban size={16} className="inline mr-1" />
-            采购项
-          </button>
-          <button
-            onClick={() => setActiveTab('reports')}
-            className={`ios-segmented-btn ${activeTab === 'reports' ? 'active' : ''}`}
-          >
-            <BarChart3 size={16} className="inline mr-1" />
-            报表
-          </button>
-          <button
-            onClick={() => setActiveTab('reminders')}
-            className={`ios-segmented-btn ${activeTab === 'reminders' ? 'active' : ''}`}
-          >
-            <Bell size={16} className="inline mr-1" />
-            提醒
-          </button>
+          <p className="text-xs text-gray-500 mb-1">待付款</p>
+          <p className="ios-full-amount text-ios-orange">{formatCurrency(totalSpent - totalPaid)}</p>
         </div>
       </div>
 
@@ -247,33 +202,45 @@ export default function ProjectDetailPage() {
               添加
             </button>
           </div>
-          <ItemList items={items} onEdit={handleEditItem} onDelete={handleDeleteItem} />
+          <ItemList 
+            items={items} 
+            projectId={parseInt(projectId)}
+            onEdit={handleEditItem} 
+            onDelete={handleDeleteItem} 
+          />
         </div>
       )}
 
       {activeTab === 'reports' && (
-        <div className="ios-card p-6">
-          <p className="text-center text-gray-400 py-4">数据报表功能开发中...</p>
-          <div className="flex gap-3 justify-center">
-            <a
-              href={`/api/export?projectId=${projectId}&format=excel`}
-              className="flex items-center gap-2 px-5 py-2.5 bg-ios-green text-white rounded-lg text-sm font-medium active:opacity-80"
-            >
-              Excel
-            </a>
-            <a
-              href={`/api/export?projectId=${projectId}&format=pdf`}
-              className="flex items-center gap-2 px-5 py-2.5 bg-ios-red text-white rounded-lg text-sm font-medium active:opacity-80"
-            >
-              PDF
-            </a>
+        <div className="space-y-4">
+          <div className="ios-card p-6">
+            <h3 className="ios-headline text-gray-900 mb-4">数据报表</h3>
+            <p className="text-gray-500 text-sm mb-4">导出项目数据进行统计分析</p>
+            <div className="flex gap-3">
+              <a
+                href={`/api/export?projectId=${projectId}&format=excel`}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-ios-green text-white rounded-lg text-sm font-medium active:opacity-80"
+              >
+                Excel 导出
+              </a>
+              <a
+                href={`/api/export?projectId=${projectId}&format=pdf`}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-ios-red text-white rounded-lg text-sm font-medium active:opacity-80"
+              >
+                PDF 导出
+              </a>
+            </div>
           </div>
         </div>
       )}
 
       {activeTab === 'reminders' && (
-        <div className="ios-card p-6">
-          <p className="text-center text-gray-400 py-4">提醒功能开发中...</p>
+        <div className="space-y-4">
+          <div className="ios-card p-6">
+            <h3 className="ios-headline text-gray-900 mb-4">提醒管理</h3>
+            <p className="text-gray-500 text-sm">设置采购项的交货提醒</p>
+            <p className="text-gray-400 text-xs mt-2">提醒功能开发中...</p>
+          </div>
         </div>
       )}
 
@@ -287,16 +254,36 @@ export default function ProjectDetailPage() {
         </button>
       )}
 
-      {/* Item Form Modal - Keep original ItemForm component */}
+      {/* iOS Bottom Tab Bar */}
+      <div className="ios-page-tab-bar">
+        <button
+          onClick={() => setActiveTab('items')}
+          className={`ios-page-tab-item ${activeTab === 'items' ? 'active' : ''}`}
+        >
+          <FolderKanban size={22} strokeWidth={activeTab === 'items' ? 2.5 : 2} />
+          <span className="text-xs font-medium mt-1">采购项</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('reports')}
+          className={`ios-page-tab-item ${activeTab === 'reports' ? 'active' : ''}`}
+        >
+          <BarChart3 size={22} strokeWidth={activeTab === 'reports' ? 2.5 : 2} />
+          <span className="text-xs font-medium mt-1">报表</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('reminders')}
+          className={`ios-page-tab-item ${activeTab === 'reminders' ? 'active' : ''}`}
+        >
+          <Bell size={22} strokeWidth={activeTab === 'reminders' ? 2.5 : 2} />
+          <span className="text-xs font-medium mt-1">提醒</span>
+        </button>
+      </div>
+
+      {/* Item Form Modal */}
       {showItemForm && (
         <ItemForm
           categories={categories}
           materialTypes={materialTypes}
-          onCreateMaterialType={handleCreateMaterialType}
-          newMaterialTypeName={newMaterialTypeName}
-          setNewMaterialTypeName={setNewMaterialTypeName}
-          showMaterialTypeInput={showMaterialTypeInput}
-          setShowMaterialTypeInput={setShowMaterialTypeInput}
           initialData={editingItem ? {
             name: editingItem.name,
             categoryId: categories.find(c => c.name === editingItem.category.name)?.id || categories[0]?.id,
@@ -306,10 +293,10 @@ export default function ProjectDetailPage() {
             totalPrice: editingItem.totalPrice || '',
             paidAmount: editingItem.paidAmount || '0',
             paymentDate: editingItem.paymentDate || '',
-            firstPaymentAmount: (editingItem as any).firstPaymentAmount || '',
-            firstPaymentDate: (editingItem as any).firstPaymentDate || '',
-            secondPaymentAmount: (editingItem as any).secondPaymentAmount || '',
-            secondPaymentDate: (editingItem as any).secondPaymentDate || '',
+            firstPaymentAmount: editingItem.firstPaymentAmount || '',
+            firstPaymentDate: editingItem.firstPaymentDate || '',
+            secondPaymentAmount: editingItem.secondPaymentAmount || '',
+            secondPaymentDate: editingItem.secondPaymentDate || '',
             expectedDeliveryDate: editingItem.expectedDeliveryDate || '',
             notes: ''
           } : undefined}

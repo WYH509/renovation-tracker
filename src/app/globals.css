@@ -91,7 +91,25 @@ img, video, table, div {
     @apply fixed bottom-0 left-0 right-0 z-50;
     @apply bg-white/95 backdrop-blur-lg;
     @apply border-t border-gray-200/50;
-    @apply safe-area-pb;
+  }
+
+  /* iOS Page Tab Bar - for tabs within a page (like project detail) */
+  .ios-page-tab-bar {
+    @apply flex items-center justify-around bg-white border-b border-gray-200;
+  }
+
+  .ios-page-tab-item {
+    @apply flex-1 flex flex-col items-center justify-center py-3 text-gray-400;
+    @apply transition-colors relative;
+  }
+
+  .ios-page-tab-item.active {
+    @apply text-ios-blue;
+  }
+
+  .ios-page-tab-item.active::after {
+    content: '';
+    @apply absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-ios-blue rounded-full;
   }
 
   /* iOS Modal Overlay */
@@ -108,6 +126,11 @@ img, video, table, div {
 
   /* iOS Stat Card */
   .ios-stat-card {
+    @apply bg-white rounded-ios p-4 shadow-ios;
+  }
+
+  /* iOS Stat Card Large - for better number display */
+  .ios-stat-card-lg {
     @apply bg-white rounded-ios p-4 shadow-ios;
   }
 
@@ -137,7 +160,7 @@ img, video, table, div {
     @apply h-px bg-gray-200/60 mx-4;
   }
 
-  /* iOS Table Container - Mobile Horizontal Scroll */
+  /* iOS Table Container */
   .ios-table-container {
     @apply bg-white rounded-ios shadow-ios overflow-hidden;
     overflow-x: auto;
@@ -176,7 +199,7 @@ img, video, table, div {
     @apply bg-gray-50;
   }
 
-  /* iOS Amount Text - Fixed Width for alignment */
+  /* iOS Amount Text */
   .ios-amount {
     @apply font-medium tabular-nums;
     white-space: nowrap;
@@ -245,6 +268,92 @@ img, video, table, div {
 
   .ios-list-row-action {
     @apply flex-shrink-0;
+  }
+
+  /* iOS Item Card - Full card that is clickable */
+  .ios-item-card {
+    @apply ios-card p-4 cursor-pointer;
+    @apply active:scale-[0.98] transition-transform;
+  }
+
+  .ios-item-card:active {
+    @apply bg-gray-50;
+  }
+
+  /* iOS Item Card Row - for inside item cards */
+  .ios-item-row {
+    @apply flex items-center justify-between py-2;
+  }
+
+  .ios-item-row-label {
+    @apply text-sm text-gray-500;
+  }
+
+  .ios-item-row-value {
+    @apply text-sm font-medium text-gray-900;
+  }
+
+  /* iOS Payment Record Card */
+  .ios-payment-card {
+    @apply flex items-center justify-between p-3 bg-gray-50 rounded-lg;
+  }
+
+  .ios-payment-label {
+    @apply text-sm text-gray-600 font-medium;
+  }
+
+  .ios-payment-amount {
+    @apply text-base font-bold tabular-nums;
+  }
+
+  /* iOS Bottom Action Bar */
+  .ios-bottom-bar {
+    @apply fixed bottom-0 left-0 right-0 z-40;
+    @apply bg-white border-t border-gray-200;
+    @apply p-4 safe-area-pb;
+  }
+
+  /* iOS Bottom Action Buttons */
+  .ios-bottom-btn {
+    @apply flex-1 py-3 rounded-lg font-medium text-base text-center;
+    @apply transition-opacity active:opacity-80;
+  }
+
+  .ios-bottom-btn-primary {
+    @apply bg-ios-blue text-white;
+  }
+
+  .ios-bottom-btn-secondary {
+    @apply bg-gray-100 text-gray-700;
+  }
+
+  .ios-bottom-btn-danger {
+    @apply bg-red-50 text-ios-red;
+  }
+
+  /* iOS Chevron Right */
+  .ios-chevron {
+    @apply text-gray-300;
+  }
+
+  /* iOS Full Width Amount - for stats cards */
+  .ios-full-amount {
+    @apply text-xl font-bold tabular-nums tracking-tight;
+    word-break: break-all;
+  }
+
+  /* iOS Detail Section */
+  .ios-detail-section {
+    @apply ios-card p-4;
+  }
+
+  .ios-detail-section-title {
+    @apply text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3;
+  }
+
+  /* iOS Section Divider */
+  .ios-section-divider {
+    @apply h-4 bg-ios-bg;
   }
 }
 
@@ -341,6 +450,21 @@ img, video, table, div {
   .container {
     padding-left: 16px;
     padding-right: 16px;
+  }
+
+  /* iOS Full Amount responsive */
+  .ios-full-amount {
+    @apply text-lg;
+  }
+
+  /* Ensure stats cards work on small screens */
+  .ios-stat-card-lg {
+    @apply p-3;
+  }
+
+  .ios-full-amount {
+    word-break: break-all;
+    white-space: normal;
   }
 }
 

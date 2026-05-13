@@ -86,7 +86,7 @@ export default function HomePage() {
               </div>
               <span className="text-sm text-gray-500">总花费</span>
             </div>
-            <p className="text-xl font-bold text-gray-900 ios-money truncate">{formatCurrency(stats.totalSpent)}</p>
+            <p className="ios-full-amount text-gray-900">{formatCurrency(stats.totalSpent)}</p>
           </div>
           <div className="ios-card p-4">
             <div className="flex items-center gap-2 mb-2">
@@ -95,7 +95,7 @@ export default function HomePage() {
               </div>
               <span className="text-sm text-gray-500">已付款</span>
             </div>
-            <p className="text-xl font-bold text-ios-green ios-money truncate">{formatCurrency(stats.totalPaid)}</p>
+            <p className="ios-full-amount text-ios-green">{formatCurrency(stats.totalPaid)}</p>
           </div>
           <div className="ios-card p-4">
             <div className="flex items-center gap-2 mb-2">
@@ -104,7 +104,7 @@ export default function HomePage() {
               </div>
               <span className="text-sm text-gray-500">待付款</span>
             </div>
-            <p className="text-xl font-bold text-ios-orange ios-money truncate">{formatCurrency(stats.totalUnpaid)}</p>
+            <p className="ios-full-amount text-ios-orange">{formatCurrency(stats.totalUnpaid)}</p>
           </div>
           <div className="ios-card p-4">
             <div className="flex items-center gap-2 mb-2">

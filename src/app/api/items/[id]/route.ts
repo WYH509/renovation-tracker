@@ -2,6 +2,31 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const itemId = parseInt(params.id)
+    const item = await prisma.item.findUnique({
+      where: { id: itemId },
+      include: {
+        category: true,
+        materialType: true,
+      }
+    })
+    
+    if (!item) {
+      return NextResponse.json({ error: 'Item not found' }, { status: 404 })
+    }
+    
+    return NextResponse.json(item)
+  } catch (error) {
+    console.error('Error fetching item:', error)
+    return NextResponse.json({ error: 'Failed to fetch item' }, { status: 500 })
+  }
+}
+
 export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
