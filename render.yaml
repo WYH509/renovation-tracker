@@ -1,15 +1,10 @@
-databases:
-  - name: renovation-tracker-db
-    plan: free
-    region: singapore
-
 services:
   - type: web
     name: renovation-tracker
     env: node
     plan: free
     region: singapore
-    buildCommand: npm ci --include=dev && npx prisma generate && npx prisma db push && npm run build
+    buildCommand: npm install && npm run build
     startCommand: npm start
     healthCheckPath: /
     envVars:
@@ -17,7 +12,15 @@ services:
         value: production
       - key: NODE_VERSION
         value: "20"
-      - key: DATABASE_URL
-        fromDatabase:
-          name: renovation-tracker-db
-          property: connectionString
+      - key: FEISHU_FUND_APP_TOKEN
+        value: YKR1bf0p0ae3BcsG4cCcFJN9nIg
+      - key: FEISHU_FUND_TABLE_ID
+        value: tblU8GoozI25dtPs
+      - key: FEISHU_RENOVATION_APP_TOKEN
+        value: IoG4bZmqraEcKZsHOdVciaA9nyb
+      - key: FEISHU_RENOVATION_TABLE_ID
+        value: tblZOMEKoLLIDnHV
+      - key: FEISHU_APP_ID
+        sync: false
+      - key: FEISHU_APP_SECRET
+        sync: false

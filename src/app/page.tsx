@@ -2,225 +2,407 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import ProjectCard from '../components/ProjectCard'
-import StatsCharts from '../components/StatsCharts'
-import { Plus, TrendingUp, Wallet, Clock, AlertTriangle, ChevronRight } from 'lucide-react'
+import { TrendingUp, Wallet, Clock, PieChart, ArrowUpRight, ArrowDownRight, ChevronRight, Plus, BarChart3 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 
-interface Project {
-  id: number
+interface FundStats {
   name: string
-  description: string | null
-  createdAt: string
-  _count: { items: number; categories: number }
-  totalSpent: number
-  totalPaid: number
+  buyAmount: number
+  yearStartValue: number
+  currentValue: number
+  weekProfit: number
+  weekReturn: number
+  monthProfit: number
+  monthReturn: number
+  yearProfit: number
+  yearReturn: number
 }
 
-interface StatsData {
+interface FundSummary {
+  totalInvested: number
+  totalCurrentValue: number
+  totalYearProfit: number
+  totalWeekProfit: number
+  totalMonthProfit: number
+  fundCount: number
+}
+
+interface RenovationStats {
   totalSpent: number
   totalPaid: number
   totalUnpaid: number
-  itemsCount: number
-  completedItems: number
   byCategory: { name: string; spent: number; paid: number }[]
-  monthlyTrend: { month: string; amount: number }[]
+  byStatus: { name: string; count: number; amount: number }[]
+}
+
+const COLORS = ['#007AFF', '#34C759', '#FF9500', '#FF3B30', '#AF52DE', '#5AC8FA', '#FFCC00', '#FF2D55']
+
+function formatPercent(val: number): string {
+  const sign = val >= 0 ? '+' : ''
+  return `${sign}${val.toFixed(2)}%`
+}
+
+function ProfitBadge({ value, return: ret, small = false }: { value: number; return: number; small?: boolean }) {
+  const isPositive = value >= 0
+  const colorClass = isPositive ? 'text-ios-green' : 'text-ios-red'
+  const bgClass = isPositive ? 'bg-green-50' : 'bg-red-50'
+  const Arrow = isPositive ? ArrowUpRight : ArrowDownRight
+  
+  return (
+    <div className={`flex items-center gap-1 ${bgClass} px-2 py-1 rounded-lg`}>
+      <Arrow size={14} className={colorClass} />
+      <span className={`font-medium tabular-nums ${colorClass} ${small ? 'text-xs' : 'text-sm'}`}>
+        {formatCurrency(Math.abs(value))}
+      </span>
+      <span className={`${colorClass} ${small ? 'text-xs' : 'text-sm'}`}>
+        ({formatPercent(ret)})
+      </span>
+    </div>
+  )
 }
 
 export default function HomePage() {
-  const [projects, setProjects] = useState<Project[]>([])
-  const [stats, setStats] = useState<StatsData | null>(null)
+  const [funds, setFunds] = useState<FundStats[]>([])
+  const [fundSummary, setFundSummary] = useState<FundSummary | null>(null)
+  const [renovation, setRenovation] = useState<RenovationStats | null>(null)
   const [loading, setLoading] = useState(true)
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [newProjectName, setNewProjectName] = useState('')
-  const [newProjectDesc, setNewProjectDesc] = useState('')
+  const [activeTab, setActiveTab] = useState<'overview' | 'funds' | 'renovation'>('overview')
 
   useEffect(() => {
-    fetchProjects()
+    fetchData()
   }, [])
 
-  const fetchProjects = async () => {
+  const fetchData = async () => {
     try {
-      const res = await fetch('/api/projects')
-      const data = await res.json()
-      setProjects(data.projects || [])
-      setStats(data.stats || null)
+      const [fundRes, renoRes] = await Promise.all([
+        fetch('/api/funds'),
+        fetch('/api/renovation'),
+      ])
+      const fundData = await fundRes.json()
+      const renoData = await renoRes.json()
+      
+      setFunds(fundData.stats || [])
+      setFundSummary(fundData.summary || null)
+      setRenovation(renoData.stats || null)
     } catch (error) {
-      console.error('Failed to fetch projects:', error)
+      console.error('Failed to fetch data:', error)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleCreateProject = async () => {
-    if (!newProjectName.trim()) return
-    try {
-      await fetch('/api/projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newProjectName, description: newProjectDesc })
-      })
-      setShowCreateModal(false)
-      setNewProjectName('')
-      setNewProjectDesc('')
-      fetchProjects()
-    } catch (error) {
-      console.error('Failed to create project:', error)
-    }
+  if (loading) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 space-y-6">
+        <div className="pt-2">
+          <h1 className="ios-large-title text-gray-900">我的资产</h1>
+        </div>
+        <div className="ios-card p-8 text-center">
+          <p className="text-gray-400">加载中...</p>
+        </div>
+      </div>
+    )
   }
+
+  // Calculate portfolio-level stats
+  const totalInvested = fundSummary?.totalInvested || 0
+  const totalCurrentValue = fundSummary?.totalCurrentValue || 0
+  const totalYearProfit = fundSummary?.totalYearProfit || 0
+  const yearReturn = totalInvested > 0 ? (totalYearProfit / totalInvested) * 100 : 0
 
   return (
     <div className="max-w-2xl mx-auto px-4 space-y-6">
       {/* iOS Large Title */}
       <div className="pt-2">
-        <h1 className="ios-large-title text-gray-900">概览</h1>
+        <h1 className="ios-large-title text-gray-900">我的资产</h1>
       </div>
 
-      {/* iOS Stat Cards */}
-      {stats && (
-        <div className="grid grid-cols-2 gap-3">
-          <div className="ios-card p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                <TrendingUp size={16} className="text-ios-blue" />
-              </div>
-              <span className="text-sm text-gray-500">总花费</span>
-            </div>
-            <p className="ios-full-amount text-gray-900">{formatCurrency(stats.totalSpent)}</p>
-          </div>
-          <div className="ios-card p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                <Wallet size={16} className="text-ios-green" />
-              </div>
-              <span className="text-sm text-gray-500">已付款</span>
-            </div>
-            <p className="ios-full-amount text-ios-green">{formatCurrency(stats.totalPaid)}</p>
-          </div>
-          <div className="ios-card p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
-                <Clock size={16} className="text-ios-orange" />
-              </div>
-              <span className="text-sm text-gray-500">待付款</span>
-            </div>
-            <p className="ios-full-amount text-ios-orange">{formatCurrency(stats.totalUnpaid)}</p>
-          </div>
-          <div className="ios-card p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-                <AlertTriangle size={16} className="text-ios-purple" />
-              </div>
-              <span className="text-sm text-gray-500">采购项</span>
-            </div>
-            <p className="text-2xl font-bold text-gray-900">{stats.itemsCount}</p>
-          </div>
-        </div>
-      )}
-
-      {/* iOS Charts Card */}
-      {stats && stats.byCategory.length > 0 && (
-        <StatsCharts data={stats} />
-      )}
-
-      {/* iOS Section - Projects */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="ios-headline text-gray-900">我的项目</h2>
-          <Link 
-            href="/projects"
-            className="text-ios-blue text-sm font-medium flex items-center gap-0.5"
-          >
-            查看全部 <ChevronRight size={16} />
-          </Link>
-        </div>
-
-        {loading ? (
-          <div className="ios-card p-8 text-center">
-            <p className="text-gray-400">加载中...</p>
-          </div>
-        ) : projects.length === 0 ? (
-          <div className="ios-card p-8 text-center">
-            <span className="text-5xl mb-3 block">🏠</span>
-            <h3 className="ios-headline text-gray-900 mb-1">还没有装修项目</h3>
-            <p className="text-gray-500 text-sm mb-4">创建你的第一个装修项目</p>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="ios-btn-filled max-w-xs"
-            >
-              创建项目
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {projects.slice(0, 3).map(project => (
-              <ProjectCard key={project.id} project={project} />
-            ))}
-          </div>
-        )}
+      {/* Tab Bar */}
+      <div className="ios-segmented w-full">
+        <button
+          onClick={() => setActiveTab('overview')}
+          className={`ios-segmented-btn flex-1 ${activeTab === 'overview' ? 'active' : ''}`}
+        >
+          总览
+        </button>
+        <button
+          onClick={() => setActiveTab('funds')}
+          className={`ios-segmented-btn flex-1 ${activeTab === 'funds' ? 'active' : ''}`}
+        >
+          基金
+        </button>
+        <button
+          onClick={() => setActiveTab('renovation')}
+          className={`ios-segmented-btn flex-1 ${activeTab === 'renovation' ? 'active' : ''}`}
+        >
+          装修
+        </button>
       </div>
 
-      {/* iOS FAB Button */}
-      <button
-        onClick={() => setShowCreateModal(true)}
-        className="fixed bottom-24 right-4 w-14 h-14 bg-ios-blue text-white rounded-full shadow-lg flex items-center justify-center active:scale-95 transition-transform z-40"
-      >
-        <Plus size={24} strokeWidth={2.5} />
-      </button>
-
-      {/* iOS Create Modal */}
-      {showCreateModal && (
-        <div className="ios-modal-overlay" onClick={() => setShowCreateModal(false)}>
-          <div className="ios-modal-content p-6" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="ios-title text-gray-900">新建项目</h2>
-              <button 
-                onClick={() => setShowCreateModal(false)}
-                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500"
-              >
-                ✕
-              </button>
-            </div>
+      {/* Overview Tab */}
+      {activeTab === 'overview' && (
+        <>
+          {/* Portfolio Summary Card */}
+          <div className="ios-card p-5">
+            <h3 className="ios-headline text-gray-900 mb-4">基金总览</h3>
             
             <div className="space-y-4">
-              <div>
-                <label className="ios-label">项目名称 *</label>
-                <input
-                  type="text"
-                  value={newProjectName}
-                  onChange={(e) => setNewProjectName(e.target.value)}
-                  className="ios-input"
-                  placeholder="如：我的新家装修"
-                />
+              {/* Main Values */}
+              <div className="flex justify-between items-end">
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">当前总市值</p>
+                  <p className="ios-full-amount text-gray-900">{formatCurrency(totalCurrentValue)}</p>
+                </div>
+                <ProfitBadge value={totalYearProfit} return={yearReturn} />
               </div>
-              <div>
-                <label className="ios-label">项目描述</label>
-                <textarea
-                  value={newProjectDesc}
-                  onChange={(e) => setNewProjectDesc(e.target.value)}
-                  rows={3}
-                  className="ios-input resize-none"
-                  placeholder="简单描述一下..."
-                />
-              </div>
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={() => setShowCreateModal(false)}
-                  className="ios-btn-secondary"
-                >
-                  取消
-                </button>
-                <button
-                  onClick={handleCreateProject}
-                  className="ios-btn-filled"
-                >
-                  创建
-                </button>
+              
+              <div className="h-px bg-gray-100" />
+              
+              {/* Secondary Stats */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">累计投入</p>
+                  <p className="text-base font-semibold text-gray-900 tabular-nums">{formatCurrency(totalInvested)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">本年收益</p>
+                  <p className={`text-base font-semibold tabular-nums ${totalYearProfit >= 0 ? 'text-ios-green' : 'text-ios-red'}`}>
+                    {formatCurrency(totalYearProfit)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">本周收益</p>
+                  <p className={`text-base font-semibold tabular-nums ${(fundSummary?.totalWeekProfit || 0) >= 0 ? 'text-ios-green' : 'text-ios-red'}`}>
+                    {formatCurrency(fundSummary?.totalWeekProfit || 0)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">本月收益</p>
+                  <p className={`text-base font-semibold tabular-nums ${(fundSummary?.totalMonthProfit || 0) >= 0 ? 'text-ios-green' : 'text-ios-red'}`}>
+                    {formatCurrency(fundSummary?.totalMonthProfit || 0)}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+
+          {/* Renovation Summary Card */}
+          {renovation && (
+            <div className="ios-card p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="ios-headline text-gray-900">装修总支出</h3>
+                <Link href="/renovation" className="text-ios-blue text-sm font-medium flex items-center gap-0.5">
+                  明细 <ChevronRight size={14} />
+                </Link>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex justify-between items-end">
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">总花费</p>
+                    <p className="ios-full-amount text-gray-900">{formatCurrency(renovation.totalSpent)}</p>
+                  </div>
+                </div>
+                
+                <div className="h-px bg-gray-100" />
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">已付款</p>
+                    <p className="text-base font-semibold text-ios-green tabular-nums">{formatCurrency(renovation.totalPaid)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">待付款</p>
+                    <p className="text-base font-semibold text-ios-orange tabular-nums">{formatCurrency(renovation.totalUnpaid)}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Category Breakdown - Renovation */}
+          {renovation && renovation.byCategory.length > 0 && (
+            <div className="ios-card p-5">
+              <h3 className="ios-headline text-gray-900 mb-4">装修分类</h3>
+              <div className="space-y-3">
+                {renovation.byCategory.map((cat, i) => (
+                  <div key={i} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                      <span className="text-sm font-medium text-gray-900">{cat.name}</span>
+                    </div>
+                    <span className="text-sm font-semibold text-gray-900 tabular-nums">{formatCurrency(cat.spent)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
       )}
+
+      {/* Funds Tab */}
+      {activeTab === 'funds' && (
+        <>
+          {/* Portfolio Summary */}
+          <div className="ios-card p-5">
+            <div className="flex justify-between items-end mb-4">
+              <div>
+                <p className="text-sm text-gray-500 mb-1">当前总市值</p>
+                <p className="ios-full-amount text-gray-900">{formatCurrency(totalCurrentValue)}</p>
+              </div>
+              <ProfitBadge value={totalYearProfit} return={yearReturn} />
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-gray-50 rounded-lg p-3 text-center">
+                <p className="text-xs text-gray-500 mb-1">持有基金</p>
+                <p className="text-lg font-bold text-gray-900">{fundSummary?.fundCount || 0}</p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-3 text-center">
+                <p className="text-xs text-gray-500 mb-1">本周</p>
+                <p className={`text-sm font-bold tabular-nums ${(fundSummary?.totalWeekProfit || 0) >= 0 ? 'text-ios-green' : 'text-ios-red'}`}>
+                  {formatPercent(fundSummary?.totalWeekProfit || 0)}
+                </p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-3 text-center">
+                <p className="text-xs text-gray-500 mb-1">本月</p>
+                <p className={`text-sm font-bold tabular-nums ${(fundSummary?.totalMonthProfit || 0) >= 0 ? 'text-ios-green' : 'text-ios-red'}`}>
+                  {formatPercent(fundSummary?.totalMonthProfit || 0)}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Fund List */}
+          <div className="ios-card overflow-hidden">
+            <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">基金明细</h3>
+            </div>
+            {funds.length === 0 ? (
+              <div className="p-8 text-center">
+                <p className="text-gray-400">暂无基金数据</p>
+                <p className="text-xs text-gray-400 mt-1">在飞书基金录入表中添加数据</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-100">
+                {funds.map((fund, i) => (
+                  <div key={i} className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium text-gray-900">{fund.name}</span>
+                      <span className={`text-sm font-semibold tabular-nums ${fund.yearProfit >= 0 ? 'text-ios-green' : 'text-ios-red'}`}>
+                        {formatCurrency(fund.currentValue)}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">持有金额：</span>
+                        <span className="text-gray-900 tabular-nums">{formatCurrency(fund.buyAmount)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">年初市值：</span>
+                        <span className="text-gray-900 tabular-nums">{formatCurrency(fund.yearStartValue)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">本周收益：</span>
+                        <span className={`tabular-nums ${fund.weekProfit >= 0 ? 'text-ios-green' : 'text-ios-red'}`}>
+                          {formatCurrency(fund.weekProfit)} ({formatPercent(fund.weekReturn)})
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">本月收益：</span>
+                        <span className={`tabular-nums ${fund.monthProfit >= 0 ? 'text-ios-green' : 'text-ios-red'}`}>
+                          {formatCurrency(fund.monthProfit)} ({formatPercent(fund.monthReturn)})
+                        </span>
+                      </div>
+                      <div className="flex justify-between col-span-2">
+                        <span className="text-gray-500">本年收益：</span>
+                        <span className={`tabular-nums ${fund.yearProfit >= 0 ? 'text-ios-green' : 'text-ios-red'}`}>
+                          {formatCurrency(fund.yearProfit)} ({formatPercent(fund.yearReturn)})
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* Renovation Tab */}
+      {activeTab === 'renovation' && (
+        <>
+          {/* Summary Card */}
+          {renovation && (
+            <div className="ios-card p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="ios-headline text-gray-900">装修支出</h3>
+                <BarChart3 size={20} className="text-ios-blue" />
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-gray-50 rounded-lg p-3 text-center">
+                  <p className="text-xs text-gray-500 mb-1">总花费</p>
+                  <p className="text-sm font-bold text-gray-900 tabular-nums">{formatCurrency(renovation.totalSpent)}</p>
+                </div>
+                <div className="bg-green-50 rounded-lg p-3 text-center">
+                  <p className="text-xs text-gray-500 mb-1">已付款</p>
+                  <p className="text-sm font-bold text-ios-green tabular-nums">{formatCurrency(renovation.totalPaid)}</p>
+                </div>
+                <div className="bg-orange-50 rounded-lg p-3 text-center">
+                  <p className="text-xs text-gray-500 mb-1">待付款</p>
+                  <p className="text-sm font-bold text-ios-orange tabular-nums">{formatCurrency(renovation.totalUnpaid)}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Category Breakdown */}
+          {renovation && renovation.byCategory.length > 0 && (
+            <div className="ios-card p-5">
+              <h3 className="ios-headline text-gray-900 mb-4">分类汇总</h3>
+              <div className="space-y-3">
+                {renovation.byCategory.map((cat, i) => (
+                  <div key={i} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                      <span className="text-sm font-medium text-gray-900">{cat.name}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-semibold text-gray-900 tabular-nums">{formatCurrency(cat.spent)}</span>
+                      {cat.paid > 0 && (
+                        <span className="text-xs text-gray-400 ml-2">（{formatCurrency(cat.paid)} 已付）</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Status Breakdown */}
+          {renovation && renovation.byStatus.length > 0 && (
+            <div className="ios-card p-5">
+              <h3 className="ios-headline text-gray-900 mb-4">状态分布</h3>
+              <div className="space-y-3">
+                {renovation.byStatus.map((s, i) => (
+                  <div key={i} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className={`w-3 h-3 rounded-full ${s.name === '已付款' ? 'bg-ios-green' : s.name === '待付款' ? 'bg-ios-orange' : 'bg-gray-400'}`} />
+                      <span className="text-sm font-medium text-gray-900">{s.name}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-semibold text-gray-900 tabular-nums">{formatCurrency(s.amount)}</span>
+                      <span className="text-xs text-gray-400 ml-2">×{s.count}项</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Bottom safe area */}
+      <div className="h-20" />
     </div>
   )
 }
