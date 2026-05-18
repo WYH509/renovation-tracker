@@ -23,7 +23,7 @@ let accessToken = ''
 export async function getAccessToken(): Promise<string> {
   if (accessToken) return accessToken
   
-  // Use app_access_token flow for internal apps
+  // Use tenant_access_token for bitable access (requires FEISHU_APP_ID + FEISHU_APP_SECRET)
   const appId = process.env.FEISHU_APP_ID
   const appSecret = process.env.FEISHU_APP_SECRET
   
@@ -31,7 +31,7 @@ export async function getAccessToken(): Promise<string> {
     throw new Error('FEISHU_APP_ID and FEISHU_APP_SECRET are required')
   }
 
-  const res = await fetch(`${FEISHU_API_BASE}/auth/v3/app_access_token`, {
+  const res = await fetch(`${FEISHU_API_BASE}/auth/v3/tenant_access_token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ app_id: appId, app_secret: appSecret })
@@ -40,7 +40,7 @@ export async function getAccessToken(): Promise<string> {
   const data = await res.json()
   if (data.code !== 0) throw new Error(`Failed to get access token: ${data.msg}`)
   
-  accessToken = data.app_access_token
+  accessToken = data.tenant_access_token
   return accessToken
 }
 
