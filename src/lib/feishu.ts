@@ -17,18 +17,34 @@ export interface FeishuListResponse {
 
 const FEISHU_API_BASE = 'https://open.feishu.cn/open-apis'
 
-// Simple in-memory token store (in production you'd want proper OAuth)
-let accessToken = ''
+// In-memory token store with TTL (2 hours for tenant_access_token)
+interface TokenStore {
+  token: string
+  expiresAt: number
+}
+
+let tokenStore: TokenStore = {
+  token: '',
+  expiresAt: 0,
+}
 
 export async function getAccessToken(): Promise<string> {
-  if (accessToken) return accessToken
+  const now = Date.now()
   
-  // Use tenant_access_token for bitable access (requires FEISHU_APP_ID + FEISHU_APP_SECRET)
+  // Return cached token if still valid (with 5-minute buffer)
+  if (tokenStore.token && tokenStore.expiresAt > now + 5 * 60 * 1000) {
+    return tokenStore.token
+  }
+  
   const appId = process.env.FEISHU_APP_ID
   const appSecret = process.env.FEISHU_APP_SECRET
   
   if (!appId || !appSecret) {
-    throw new Error('FEISHU_APP_ID and FEISHU_APP_SECRET are required')
+    throw new Error('FEISHU_APP_ID and FEISHU_APP_SECRET are required. Please set these environment variables.')
+  }
+
+  if (appId === 'your_feishu_app_id' || appSecret === 'your_feishu_app_secret') {
+    throw new Error('FEISHU credentials are placeholder values. Please set real FEISHU_APP_ID and FEISHU_APP_SECRET in your .env file and on the Render dashboard.')
   }
 
   const res = await fetch(`${FEISHU_API_BASE}/auth/v3/tenant_access_token`, {
@@ -38,13 +54,20 @@ export async function getAccessToken(): Promise<string> {
   })
   
   const data = await res.json()
-  if (data.code !== 0) throw new Error(`Failed to get access token: ${data.msg}`)
+  if (data.code !== 0) {
+    throw new Error(`Failed to get Feishu access token (code ${data.code}): ${data.msg}. Please verify your FEISHU_APP_ID and FEISHU_APP_SECRET are correct.`)
+  }
   
-  accessToken = data.tenant_access_token
-  return accessToken
+  // tenant_access_token typically expires in 2 hours
+  tokenStore = {
+    token: data.tenant_access_token,
+    expiresAt: now + 2 * 60 * 60 * 1000,
+  }
+  
+  return tokenStore.token
 }
 
-async function feishuRequest(path: string, options: RequestInit = {}) {
+async function feishuRequest(path: string, options: RequestInit = {}): Promise<unknown> {
   const token = await getAccessToken()
   
   const res = await fetch(`${FEISHU_API_BASE}${path}`, {
@@ -81,7 +104,7 @@ export async function listRecords(
 
     const data = await feishuRequest(
       `/bitable/v1/apps/${appToken}/tables/${tableId}/records?${params}`
-    )
+    ) as FeishuListResponse
 
     allRecords.push(...data.data.items)
     hasMore = data.data.has_more
@@ -102,7 +125,7 @@ export async function createRecord(
       method: 'POST',
       body: JSON.stringify({ fields }),
     }
-  )
+  ) as { data: FeishuRecord }
   return data.data
 }
 
@@ -118,7 +141,7 @@ export async function updateRecord(
       method: 'PUT',
       body: JSON.stringify({ fields }),
     }
-  )
+  ) as { data: FeishuRecord }
   return data.data
 }
 

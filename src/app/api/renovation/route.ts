@@ -46,7 +46,8 @@ export async function GET() {
     return NextResponse.json({ items, stats })
   } catch (error) {
     console.error('Error fetching renovation items:', error)
-    return NextResponse.json({ error: 'Failed to fetch renovation items' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return NextResponse.json({ error: `Failed to fetch renovation items: ${message}` }, { status: 500 })
   }
 }
 
@@ -116,6 +117,7 @@ export async function POST(request: Request) {
     return NextResponse.json(record)
   } catch (error) {
     console.error('Error creating renovation item:', error)
-    return NextResponse.json({ error: 'Failed to create renovation item' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return NextResponse.json({ error: `Failed to create renovation item: ${message}` }, { status: 500 })
   }
 }

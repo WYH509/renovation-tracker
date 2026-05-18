@@ -62,7 +62,8 @@ export async function GET() {
     return NextResponse.json({ funds, stats, summary })
   } catch (error) {
     console.error('Error fetching funds:', error)
-    return NextResponse.json({ error: 'Failed to fetch funds' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return NextResponse.json({ error: `Failed to fetch funds: ${message}` }, { status: 500 })
   }
 }
 
@@ -90,6 +91,7 @@ export async function POST(request: Request) {
     return NextResponse.json(record)
   } catch (error) {
     console.error('Error creating fund:', error)
-    return NextResponse.json({ error: 'Failed to create fund' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return NextResponse.json({ error: `Failed to create fund: ${message}` }, { status: 500 })
   }
 }
