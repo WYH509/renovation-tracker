@@ -1,258 +1,116 @@
-# 装修花费记账管理APP - 产品规格书
+# 资产管家 (Asset Manager) - 产品规格书
 
 ## 1. 项目概述
 
-- **项目名称**：装修记账本 (Renovation Tracker)
-- **类型**：带后端数据库的全栈WebApp
-- **核心功能**：装修项目拆分、材料采购管理、费用跟踪、智能提醒、数据可视化
-- **目标用户**：正在进行装修的用户，追踪装修花费和进度
-- **技术栈**：Next.js (前端) + Express/Node.js (后端) + PostgreSQL (数据库) + Render (部署)
+- **项目名称**：资产管家
+- **类型**：带飞书多维表格后端数据库的全栈 WebApp
+- **核心功能**：装修支出记账、基金持仓管理
+- **目标用户**：家庭资产管理，追踪装修花费和基金投资
+- **技术栈**：Next.js 14 (前端) + 飞书多维表格 API (数据库) + Tailwind CSS (样式) + Render (部署)
+- **GitHub**：https://github.com/WYH509/renovation-tracker
+- **在线地址**：https://renovation-tracker-s4wl.onrender.com
 
 ---
 
-## 2. 数据库设计
+## 2. 数据架构
 
-### 数据模型
+### 2.1 装修支出数据库
+- **App Token**：`IoG4bZmqraEcKZsHOdVciaA9nyb`
+- **Table ID**：`tblZOMEKoLLIDnHV`
+- **字段**：装修管理数据库（文本，主键）、项目名称、分类（多选）、金额（数字）、购买日期（日期）、状态（多选）、备注（文本）
 
-#### 2.1 项目表 (projects)
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | SERIAL PRIMARY KEY | 主键 |
-| name | VARCHAR(255) | 项目名称 |
-| description | TEXT | 项目描述 |
-| created_at | TIMESTAMP | 创建时间 |
-| updated_at | TIMESTAMP | 更新时间 |
-
-#### 2.2 施工板块表 (categories)
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | SERIAL PRIMARY KEY | 主键 |
-| project_id | INTEGER FK | 所属项目 |
-| name | VARCHAR(255) | 板块名称（如：水电工程、泥瓦工程） |
-| sort_order | INTEGER | 排序 |
-| created_at | TIMESTAMP | 创建时间 |
-
-#### 2.3 材料分类表 (material_types)
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | SERIAL PRIMARY KEY | 主键 |
-| project_id | INTEGER FK | 所属项目 |
-| name | VARCHAR(255) | 分类名称（如：瓷砖、地板、门窗） |
-| parent_id | INTEGER | 父分类（可为空） |
-| created_at | TIMESTAMP | 创建时间 |
-
-#### 2.4 采购项目表 (items)
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | SERIAL PRIMARY KEY | 主键 |
-| project_id | INTEGER FK | 所属项目 |
-| category_id | INTEGER FK | 施工板块 |
-| material_type_id | INTEGER FK | 材料分类 |
-| name | VARCHAR(255) | 采购项目名称 |
-| unit | VARCHAR(50) | 单位 |
-| quantity | DECIMAL(10,2) | 数量 |
-| unit_price | DECIMAL(10,2) | 单价 |
-| total_price | DECIMAL(10,2) | 总价 |
-| paid_amount | DECIMAL(10,2) | 已付款 |
-| payment_status | VARCHAR(50) | 付款状态（未付款/部分付款/已付清） |
-| payment_date | DATE | 付款日期 |
-| expected_delivery_date | DATE | 预计交货日期 |
-| actual_completion_date | DATE | 实际完工日期 |
-| notes | TEXT | 备注 |
-| is_completed | BOOLEAN | 是否完工 |
-| reminder_days | INTEGER | 提前提醒天数 |
-| reminder_date | DATE | 提醒日期 |
-| created_at | TIMESTAMP | 创建时间 |
-| updated_at | TIMESTAMP | 更新时间 |
-
-#### 2.5 费用记录表 (expenses)
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | SERIAL PRIMARY KEY | 主键 |
-| project_id | INTEGER FK | 所属项目 |
-| item_id | INTEGER FK | 关联采购项目（可为空） |
-| category_id | INTEGER FK | 施工板块 |
-| amount | DECIMAL(10,2) | 金额 |
-| expense_date | DATE | 费用日期 |
-| description | VARCHAR(255) | 描述 |
-| created_at | TIMESTAMP | 创建时间 |
-
-#### 2.6 提醒表 (reminders)
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | SERIAL PRIMARY KEY | 主键 |
-| item_id | INTEGER FK | 关联采购项目 |
-| reminder_date | DATE | 提醒日期 |
-| message | TEXT | 提醒内容 |
-| is_completed | BOOLEAN | 是否已处理 |
-| created_at | TIMESTAMP | 创建时间 |
+### 2.2 基金持仓数据库
+- **App Token**：`YKR1bf0p0ae3BcsG4cCcFJN9nIg`
+- **Table ID**：`tblU8GoozI25dtPs`
+- **字段**：基金持仓数据库（文本，主键）、基金名称、购买日期（日期）、购买金额、上月净值、持仓份额、今日净值、上周净值、年初净值、累计分红
 
 ---
 
 ## 3. 页面结构
 
-### 3.1 首页仪表盘 (/)
-- 项目总览卡片
-- 总花费统计
-- 待付款统计
-- 即将到期提醒
-- 费用分类饼图
-- 最近采购列表
+### 3.1 首页 (/)
+- 顶部 Tab 切换：总览 / 基金 / 装修
+- **总览 Tab**：基金总市值 + 收益、装修总支出 + 已付/待付
+- **基金 Tab**：持有基金列表、各基金收益统计
+- **装修 Tab**：装修支出分类汇总、状态分布
 
-### 3.2 项目管理 (/projects)
-- 项目列表
-- 新增/编辑项目
-- 项目详情
-
-### 3.3 施工板块 (/categories/:projectId)
-- 板块列表与编辑
-- 按板块查看采购项
-
-### 3.4 采购管理 (/items/:projectId)
-- 采购项目列表
-- 筛选：按板块、按分类、按状态
-- 新增/编辑采购项
-- 付款进度追踪
-
-### 3.5 数据报表 (/reports/:projectId)
-- 费用趋势折线图
-- 分类费用占比饼图
-- 各板块花费柱状图
-- 数据导出Excel/PDF按钮
-
-### 3.6 提醒中心 (/reminders/:projectId)
-- 待处理提醒列表
-- 已完成提醒历史
+### 3.2 装修页面 (/renovation)
+- 装修支出列表（可查看详情）
+- 顶部添加按钮 → 添加支出弹窗
+- 支持分类、状态筛选
 
 ---
 
-## 4. 功能详细
+## 4. 技术设计
 
-### 4.1 项目管理
-- 创建装修项目（名称、描述）
-- 编辑/删除项目
-- 查看项目总览
+### 4.1 前端计算模式
+- Next.js App Router，所有数据计算在前端完成
+- 飞书多维表格仅作原始数据存储
+- 前端实时读取飞书数据并计算统计结果
 
-### 4.2 施工板块管理
-- 预设板块：水电工程、泥瓦工程、木工工程、油漆工程、安装工程、软装采购
-- 支持自定义板块
-- 拖拽排序
+### 4.2 API 路由
+- `GET /api/funds` - 获取基金数据及统计
+- `GET /api/renovation` - 获取装修数据及统计
+- `POST /api/funds` - 新增基金记录
+- `POST /api/renovation` - 新增装修记录
 
-### 4.3 材料分类
-- 按装修材料类型分类
-- 支持多级分类
+### 4.3 认证
+- 使用 `tenant_access_token`（飞书自建应用）
+- App Token + App Secret 获取
+- 需要在 Render Dashboard 配置 `FEISHU_APP_ID` 和 `FEISHU_APP_SECRET`
 
-### 4.4 采购项目
-- 手动录入采购项
-- 关联施工板块和材料分类
-- 填写：名称、单位、数量、单价、总价
-- 填写：已付款金额、付款进度、付款日期
-- 填写：预计交货日期、完工日期
-- 设置提醒（按天数或具体日期）
-- 标记完工状态
-
-### 4.5 智能提醒
-- 根据设置的提醒日期自动提醒
-- 提前N天提醒施工进度
-- 提醒供货商交货
-
-### 4.6 数据统计
-- 按施工板块分类统计
-- 按材料类型分类统计
-- 总花费/已付款/待付款
-- 费用趋势
-
-### 4.7 数据导出
-- 导出Excel（所有数据）
-- 导出PDF（报表）
+### 4.4 iOS 风格
+- 系统字体（-apple-system）
+- iOS 颜色系统（#007AFF 等）
+- 卡片式布局、圆角 10px
+- 底部 Tab Bar 固定导航
+- 触摸友好的大按钮
 
 ---
 
-## 5. UI设计
+## 5. 环境变量
 
-### 设计风格
-- 现代简约风格，扁平化设计
-- 配色方案：
-  - 主色：#2563EB（蓝色，专业感）
-  - 辅助色：#10B981（绿色，完成状态）
-  - 警告色：#F59E0B（橙色，提醒）
-  - 危险色：#EF4444（红色，逾期）
-  - 背景色：#F8FAFC（浅灰白）
-  - 文字色：#1E293B（深灰）
-
-### 字体
-- 标题：Inter, -apple-system, sans-serif
-- 正文：Inter, -apple-system, sans-serif
-
-### 响应式
-- 移动端优先设计
-- 支持iPhone Safari访问
-- 触摸友好的交互
+| 变量 | 说明 | 状态 |
+|------|------|------|
+| FEISHU_APP_ID | 飞书自建应用 App ID | **需要配置** |
+| FEISHU_APP_SECRET | 飞书自建应用 App Secret | **需要配置** |
+| FEISHU_FUND_APP_TOKEN | 基金多维表格 App Token | 已配置 |
+| FEISHU_FUND_TABLE_ID | 基金多维表格 Table ID | 已配置 |
+| FEISHU_RENOVATION_APP_TOKEN | 装修多维表格 App Token | 已配置 |
+| FEISHU_RENOVATION_TABLE_ID | 装修多维表格 Table ID | 已配置 |
+| NODE_ENV | production | 已配置 |
 
 ---
 
-## 6. API设计
+## 6. 部署
 
-### 认证
-- 简单token认证（后续扩展）
+### 6.1 Render 部署
+- **Service ID**：`srv-d7un1f9j2pic73c2b7d0`
+- **Dashboard**：https://dashboard.render.com/web/srv-d7un1f9j2pic73c2b7d0
+- **自动部署**：推送到 GitHub main 分支自动触发
 
-### 接口列表
-
-```
-GET    /api/projects              - 获取所有项目
-POST   /api/projects             - 创建项目
-GET    /api/projects/:id         - 获取项目详情
-PUT    /api/projects/:id         - 更新项目
-DELETE /api/projects/:id         - 删除项目
-
-GET    /api/projects/:id/categories     - 获取板块列表
-POST   /api/projects/:id/categories      - 创建板块
-PUT    /api/categories/:id              - 更新板块
-DELETE /api/categories/:id              - 删除板块
-
-GET    /api/projects/:id/items          - 获取采购项列表
-POST   /api/projects/:id/items          - 创建采购项
-PUT    /api/items/:id                    - 更新采购项
-DELETE /api/items/:id                    - 删除采购项
-
-GET    /api/projects/:id/expenses       - 获取费用记录
-POST   /api/projects/:id/expenses       - 创建费用记录
-DELETE /api/expenses/:id                 - 删除费用记录
-
-GET    /api/projects/:id/reminders      - 获取提醒列表
-PUT    /api/reminders/:id/complete      - 标记提醒完成
-
-GET    /api/projects/:id/stats          - 获取统计数据
-GET    /api/projects/:id/export/excel    - 导出Excel
-GET    /api/projects/:id/export/pdf      - 导出PDF
-```
+### 6.2 部署流程
+1. 代码推送到 GitHub
+2. Render 自动构建（约 2-3 分钟）
+3. 验证 `/api/funds` 和 `/api/renovation` 返回数据
 
 ---
 
-## 7. 部署
+## 7. 当前状态
 
-### 平台
-- Render.com（免费层）
+### ✅ 已完成
+- 首页三 Tab 架构（总览/基金/装修）
+- 基金数据读取和收益计算
+- 装修数据读取和支出统计
+- iOS 风格 UI
+- 飞书多维表格 API 集成
 
-### 数据库
-- Render PostgreSQL（免费层）
+### ⚠️ 阻塞中
+- **飞书 App Secret 未配置**：Render 上 FEISHU_APP_SECRET 为占位值
+- 需要用户提供真实的飞书自建应用 App ID 和 App Secret
 
-### 部署流程
-1. 创建Render Web Service
-2. 连接GitHub仓库
-3. 配置环境变量
-4. 自动部署
-
----
-
-## 8. 验收标准
-
-- [ ] 可以创建装修项目
-- [ ] 可以管理施工板块
-- [ ] 可以录入采购项目并关联板块
-- [ ] 可以追踪付款进度
-- [ ] 可以设置提醒
-- [ ] 可以查看数据统计图表
-- [ ] 可以导出Excel和PDF
-- [ ] 移动端界面美观可用
-- [ ] 数据持久化存储在PostgreSQL
+### 📋 待完成（根据需求）
+- 大按钮板块式首页（每个板块一张大卡片）
+- 基金模块的完整 CRUD
+- 装修模块的详情/编辑/删除
+- 权限控制（仅房主可编辑）

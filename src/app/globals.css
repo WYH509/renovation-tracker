@@ -75,6 +75,14 @@ img, video, table, div {
     @apply block text-sm font-medium text-gray-500 mb-2 px-1;
   }
 
+  /* iOS Input */
+  .ios-input {
+    @apply w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-base text-gray-900;
+    @apply placeholder:text-gray-400;
+    @apply focus:outline-none focus:ring-2 focus:ring-ios-blue focus:border-transparent;
+    @apply transition-shadow;
+  }
+
   /* iOS Section Header */
   .ios-section-header {
     @apply text-xs font-semibold text-gray-400 uppercase tracking-wide px-4 py-2;
