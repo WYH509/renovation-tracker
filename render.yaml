@@ -20,7 +20,3 @@ services:
         value: IoG4bZmqraEcKZsHOdVciaA9nyb
       - key: FEISHU_RENOVATION_TABLE_ID
         value: tblZOMEKoLLIDnHV
-      - key: FEISHU_APP_ID
-        value: cli_a7e2c5c26a0a900f
-      - key: FEISHU_APP_SECRET
-        value: w5dOPQUeeNqVwBLAZKKxJbns1CyYiaBY
