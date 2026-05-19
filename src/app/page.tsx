@@ -95,7 +95,7 @@ export default function HomePage() {
     return (
       <div className="max-w-2xl mx-auto px-4 space-y-6">
         <div className="pt-2">
-          <h1 className="ios-large-title text-gray-900">我的资产</h1>
+          <h1 className="ios-large-title text-gray-900">【聚财通录 · 资产总览】</h1>
         </div>
         <div className="ios-card p-8 text-center">
           <p className="text-gray-400">加载中...</p>

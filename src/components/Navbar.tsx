@@ -23,7 +23,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-14">
           <div className="flex items-center gap-2">
             <span className="text-xl">🏠</span>
-            <span className="font-semibold text-gray-900 text-lg">资产管家</span>
+            <span className="font-semibold text-gray-900 text-lg">聚财通录</span>
           </div>
         </div>
       </div>
