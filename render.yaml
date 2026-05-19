@@ -21,6 +21,6 @@ services:
       - key: FEISHU_RENOVATION_TABLE_ID
         value: tblZOMEKoLLIDnHV
       - key: FEISHU_APP_ID
-        sync: false
+        value: cli_a7e2c5c26a0a900f
       - key: FEISHU_APP_SECRET
-        sync: false
+        value: w5dOPQUeeNqVwBLAZKKxJbns1CyYiaBY
