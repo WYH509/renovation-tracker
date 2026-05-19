@@ -1,9 +1,0 @@
-[
-  {"key": "FEISHU_APP_ID", "value": "cli_a7e2c5c26a0a900f"},
-  {"key": "FEISHU_APP_SECRET", "value": "w5dOPQUeeNqVwBLAZKKxJbns1CyYiaBY"},
-  {"key": "FEISHU_FUND_APP_TOKEN", "value": "YKR1bf0p0ae3BcsG4cCcFJN9nIg"},
-  {"key": "FEISHU_FUND_TABLE_ID", "value": "tblU8GoozI25dtPs"},
-  {"key": "FEISHU_RENOVATION_APP_TOKEN", "value": "IoG4bZmqraEcKZsHOdVciaA9nyb"},
-  {"key": "FEISHU_RENOVATION_TABLE_ID", "value": "tblZOMEKoLLIDnHV"},
-  {"key": "DEEPSEEK_API_KEY", "value": "sk-7ded466a7c164cac820722b2273094d4"}
-]
